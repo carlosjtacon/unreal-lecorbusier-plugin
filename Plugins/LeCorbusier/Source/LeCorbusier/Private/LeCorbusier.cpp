@@ -8,7 +8,12 @@
 void FLeCorbusierModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-	FEditorModeRegistry::Get().RegisterMode<FLeCorbusierEdMode>(FLeCorbusierEdMode::EM_LeCorbusierEdModeId, LOCTEXT("LeCorbusierEdModeName", "LeCorbusierEdMode"), FSlateIcon(), true);
+	FEditorModeRegistry::Get().RegisterMode<FLeCorbusierEdMode>(
+		FLeCorbusierEdMode::EM_LeCorbusierEdModeId, 
+		LOCTEXT("LeCorbusierEdModeName", "LeCorbusierEdMode"), 
+		FSlateIcon(), 
+		true
+		);
 }
 
 void FLeCorbusierModule::ShutdownModule()
