@@ -38,7 +38,7 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 			.Padding(5)
 			[
 				SNew(STextBlock)
-				.Text(LOCTEXT("HowToEnable", "Select Land to build the environment."))
+				.Text(LOCTEXT("HowToEnable", "Select the land to build the environment."))
 			]
 			
 			// Environment Settings
