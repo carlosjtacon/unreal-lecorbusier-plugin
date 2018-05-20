@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SlateBasics.h"
+//#include "SlateExtras.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**
@@ -18,4 +19,9 @@ public:
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+
+private:
+	FReply HandleAssetDropped(const FGeometry& DropZoneGeometry, const FDragDropEvent& DragDropEvent);
+	EVisibility GetDropZoneVisibility() const;
+	
 };
