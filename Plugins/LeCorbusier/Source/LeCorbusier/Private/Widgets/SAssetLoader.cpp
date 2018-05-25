@@ -95,7 +95,7 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 				// Assets Tile View
 				+ SOverlay::Slot()
 				[
-					SAssignNew(ListViewWidget, SListView<UObject*>)
+					SAssignNew(ListViewWidget, SListView<ULCAsset*>)
 					.ItemHeight(24)
 					.ClearSelectionOnClick(false)
 					.SelectionMode(ESelectionMode::Single)
@@ -120,20 +120,21 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 	];
 }
 
-TSharedRef<ITableRow> SAssetLoader::GenerateListRow(UObject* Item, const TSharedRef<STableViewBase>& OwnerTable)
+TSharedRef<ITableRow> SAssetLoader::GenerateListRow(ULCAsset* Item, const TSharedRef<STableViewBase>& OwnerTable)
 {
 	return
 		SNew(STableRow<UObject*>, OwnerTable)
 		.Padding(2)
 		[
 			SNew(STextBlock)
-			.Text(FText::FromName(Item->GetFName()))
+			.Text(FText::FromName(Item->Asset->GetFName()))
 		];
 }
 
-void SAssetLoader::ListSelectionChanged(UObject* Item, ESelectInfo::Type SelectInfo)
+void SAssetLoader::ListSelectionChanged(ULCAsset* Item, ESelectInfo::Type SelectInfo)
 {
 	// TODO
+	// RefreshDetailsWidget();
 }
 
 EVisibility SAssetLoader::GetListZoneVisibility() const
@@ -164,9 +165,11 @@ FReply SAssetLoader::HandleAssetDropped(const FGeometry& DropZoneGeometry, const
 			// }
 
 			// GWarn->BeginSlowTask(LOCTEXT("AddFoliageType_LoadPackage", "Loading Foliage Type"), true, false);
-			UObject* Asset = AssetData.GetAsset();
+			ULCAsset* Obj = NewObject<ULCAsset>();
+			Obj->Asset = AssetData.GetAsset();
+			// UObject* Asset = AssetData.GetAsset();
 
-			SAssetLoader::Items.Add(Asset);
+			SAssetLoader::Items.Add(Obj);
 			UE_LOG(LogTemp, Warning, TEXT("Dropped AssetData"));
 			ListViewWidget->RequestListRefresh();
 			// AssetData.PrintAssetData();

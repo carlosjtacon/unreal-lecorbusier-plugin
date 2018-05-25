@@ -7,6 +7,8 @@
 //#include "SlateExtras.h"
 #include "Widgets/SCompoundWidget.h"
 
+#include "../Types/ULCAsset.h"
+
 /**
  * 
  */
@@ -21,11 +23,11 @@ public:
 	void Construct(const FArguments& InArgs);
 
 private:
-	TArray<UObject*> Items;
+	TArray<ULCAsset*> Items;
 	
-	TSharedPtr<SListView<UObject*>> ListViewWidget;
-	TSharedRef<ITableRow> GenerateListRow(UObject* Item, const TSharedRef<STableViewBase>& OwnerTable);
-	void ListSelectionChanged(UObject* Item, ESelectInfo::Type SelectInfo);
+	TSharedPtr<SListView<ULCAsset*>> ListViewWidget;
+	TSharedRef<ITableRow> GenerateListRow(ULCAsset* Item, const TSharedRef<STableViewBase>& OwnerTable);
+	void ListSelectionChanged(ULCAsset* Item, ESelectInfo::Type SelectInfo);
 	EVisibility GetListZoneVisibility() const;
 
 	FReply HandleAssetDropped(const FGeometry& DropZoneGeometry, const FDragDropEvent& DragDropEvent);
