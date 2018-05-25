@@ -28,44 +28,44 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 	};
 
 	SAssignNew(ToolkitWidget, SBorder)
-		.IsEnabled_Static(&Locals::IsWidgetEnabled)
+	[
+		SNew(SVerticalBox)
+
+		// SelectedActor is Plugin Land Input
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(5)
 		[
-			SNew(SVerticalBox)
-
-			// SelectedActor is Plugin Land Input
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(5)
-			[
-				SNew(STextBlock)
-				.Text(LOCTEXT("HowToEnable", "Select the land to build the environment."))
-			]
+			SNew(STextBlock)
+			.Text(LOCTEXT("HowToEnable", "Select the land to build the environment."))
+		]
 			
-			// Environment Settings
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(5)
-			[
-				SNew(SEnvironmentSettings)
-			]
+		// Environment Settings
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(5)
+		[
+			SNew(SEnvironmentSettings)
+		]
 
-			// Assets and Details
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(5)
-			[
-				SNew(SAssetLoader)
-			]
+		// Assets and Details
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(5)
+		[
+			SNew(SAssetLoader)
+		]
 
-			// Build Environment Button
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(5)
-			[
-				SNew(SBuildButton)
-			]
+		// Build Environment Button
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(5)
+		[
+			SNew(SBuildButton)
+			.IsEnabled_Static(&Locals::IsWidgetEnabled)
+		]
 
-		];
+	];
 		
 	FModeToolkit::Init(InitToolkitHost);
 }
