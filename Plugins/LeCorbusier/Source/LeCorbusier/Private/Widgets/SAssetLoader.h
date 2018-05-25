@@ -21,6 +21,13 @@ public:
 	void Construct(const FArguments& InArgs);
 
 private:
+	TArray<UObject*> Items;
+	
+	TSharedPtr<SListView<UObject*>> ListViewWidget;
+	TSharedRef<ITableRow> GenerateListRow(UObject* Item, const TSharedRef<STableViewBase>& OwnerTable);
+	void ListSelectionChanged(UObject* Item, ESelectInfo::Type SelectInfo);
+	EVisibility GetListZoneVisibility() const;
+
 	FReply HandleAssetDropped(const FGeometry& DropZoneGeometry, const FDragDropEvent& DragDropEvent);
 	EVisibility GetDropZoneVisibility() const;
 	

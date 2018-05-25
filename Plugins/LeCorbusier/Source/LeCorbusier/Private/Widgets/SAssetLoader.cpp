@@ -93,10 +93,17 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 				SNew(SOverlay)
 
 				// Assets Tile View
-				// + SOverlay::Slot()
-				// [
-
-				// ]
+				+ SOverlay::Slot()
+				[
+					SAssignNew(ListViewWidget, SListView<UObject*>)
+					.ItemHeight(24)
+					.ClearSelectionOnClick(false)
+					.SelectionMode(ESelectionMode::Single)
+					.ListItemsSource(&Items)
+					.Visibility(this, &SAssetLoader::GetListZoneVisibility)
+					.OnGenerateRow(this, &SAssetLoader::GenerateListRow)
+					.OnSelectionChanged(this, &SAssetLoader::ListSelectionChanged)
+				]
 
 				// Foliage Mesh Drop Zone
 				+ SOverlay::Slot()
@@ -113,28 +120,62 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 	];
 }
 
+TSharedRef<ITableRow> SAssetLoader::GenerateListRow(UObject* Item, const TSharedRef<STableViewBase>& OwnerTable)
+{
+	return
+		SNew(STableRow<UObject*>, OwnerTable)
+		.Padding(2)
+		[
+			SNew(STextBlock)
+			.Text(FText::FromName(Item->GetFName()))
+		];
+}
+
+void SAssetLoader::ListSelectionChanged(UObject* Item, ESelectInfo::Type SelectInfo)
+{
+	// TODO
+}
+
+EVisibility SAssetLoader::GetListZoneVisibility() const
+{
+	if (FSlateApplication::Get().IsDragDropping())
+	{
+		TArray<FAssetData> DraggedAssets = AssetUtil::ExtractAssetDataFromDrag(FSlateApplication::Get().GetDragDroppingContent());
+		for (const FAssetData& AssetData : DraggedAssets)
+			if (AssetData.IsValid()) return EVisibility::Hidden;
+	}
+
+	return EVisibility::Visible;
+}
+
 FReply SAssetLoader::HandleAssetDropped(const FGeometry& DropZoneGeometry, const FDragDropEvent& DragDropEvent)
 {
-	// TArray<FAssetData> DroppedAssetData = AssetUtil::ExtractAssetDataFromDrag(DragDropEvent);
-	// if (DroppedAssetData.Num() > 0)
-	// {
-	// 	// Treat the entire drop as a transaction (in case multiples types are being added)
-	// 	const FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "FoliageMode_DragDropTypesTransaction", "Drag-drop Foliage"));
+	TArray<FAssetData> DroppedAssetData = AssetUtil::ExtractAssetDataFromDrag(DragDropEvent);
+	if (DroppedAssetData.Num() > 0)
+	{
+		// Treat the entire drop as a transaction (in case multiples types are being added)
+		// const FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "FoliageMode_DragDropTypesTransaction", "Drag-drop Foliage"));
 
-	// 	for (auto& AssetData : DroppedAssetData)
-	// 	{
-	// 		if (AddFoliageTypeCombo.IsValid())
-	// 		{
-	// 			AddFoliageTypeCombo->SetIsOpen(false);
-	// 		}
+		for (auto& AssetData : DroppedAssetData)
+		{
+			// if (AddFoliageTypeCombo.IsValid())
+			// {
+			// 	AddFoliageTypeCombo->SetIsOpen(false);
+			// }
 
-	// 		GWarn->BeginSlowTask(LOCTEXT("AddFoliageType_LoadPackage", "Loading Foliage Type"), true, false);
-	// 		UObject* Asset = AssetData.GetAsset();
-	// 		GWarn->EndSlowTask();
+			// GWarn->BeginSlowTask(LOCTEXT("AddFoliageType_LoadPackage", "Loading Foliage Type"), true, false);
+			UObject* Asset = AssetData.GetAsset();
 
-	// 		FoliageEditMode->AddFoliageAsset(Asset);
-	// 	}
-	// }
+			SAssetLoader::Items.Add(Asset);
+			UE_LOG(LogTemp, Warning, TEXT("Dropped AssetData"));
+			ListViewWidget->RequestListRefresh();
+			// AssetData.PrintAssetData();
+
+			// GWarn->EndSlowTask();
+
+			// FoliageEditMode->AddFoliageAsset(Asset);
+		}
+	}
 
 	return FReply::Handled();
 }
@@ -145,12 +186,7 @@ EVisibility SAssetLoader::GetDropZoneVisibility() const
 	{
 		TArray<FAssetData> DraggedAssets = AssetUtil::ExtractAssetDataFromDrag(FSlateApplication::Get().GetDragDroppingContent());
 		for (const FAssetData& AssetData : DraggedAssets)
-		{
-			if (AssetData.IsValid())
-			{
-				return EVisibility::Visible;
-			}
-		}
+			if (AssetData.IsValid()) return EVisibility::Visible;
 	}
 
 	return EVisibility::Hidden;
