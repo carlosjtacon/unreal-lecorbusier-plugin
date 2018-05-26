@@ -24,7 +24,6 @@ public:
 
 private:
 	TArray<ULCAsset*> Items;
-	
 	TSharedPtr<SListView<ULCAsset*>> ListViewWidget;
 	TSharedRef<ITableRow> GenerateListRow(ULCAsset* Item, const TSharedRef<STableViewBase>& OwnerTable);
 	void ListSelectionChanged(ULCAsset* Item, ESelectInfo::Type SelectInfo);
@@ -32,5 +31,7 @@ private:
 
 	FReply HandleAssetDropped(const FGeometry& DropZoneGeometry, const FDragDropEvent& DragDropEvent);
 	EVisibility GetDropZoneVisibility() const;
+
+	TSharedPtr<class IDetailsView> DetailsWidget;
 	
 };

@@ -6,6 +6,8 @@
 //#include "EditorStyleSet.h"
 //#include "ContentBrowserModule.h"
 #include "AssetSelection.h"
+#include "PropertyEditorModule.h"
+#include "IDetailsView.h"
 
 #define LOCTEXT_NAMESPACE "FSAssetLoader"
 
@@ -70,6 +72,13 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SAssetLoader::Construct(const FArguments& InArgs)
 {
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FDetailsViewArgs Args(false, false, false, FDetailsViewArgs::HideNameArea, true);
+	Args.bShowActorLabel = false;
+	DetailsWidget = PropertyModule.CreateDetailView(Args);
+	//DetailsWidget->SetVisibility(FoliageEditMode->UISettings.GetShowPaletteItemDetails() ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed);
+	//DetailsWidget->SetIsPropertyEditingEnabledDelegate(FIsPropertyEditingEnabled::CreateSP(this, &SFoliagePalette::GetIsPropertyEditingEnabled));
+
 	ChildSlot
 	[
 		SNew(SVerticalBox)
@@ -117,6 +126,14 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 				]
 			]
 		]
+
+		+ SVerticalBox::Slot()
+		[
+			SNew(SBorder)
+			[
+				DetailsWidget.ToSharedRef()
+			]
+		]
 	];
 }
 
@@ -134,7 +151,9 @@ TSharedRef<ITableRow> SAssetLoader::GenerateListRow(ULCAsset* Item, const TShare
 void SAssetLoader::ListSelectionChanged(ULCAsset* Item, ESelectInfo::Type SelectInfo)
 {
 	// TODO
-	// RefreshDetailsWidget();
+	const bool bForceRefresh = true;
+	// DetailsWidget->SetObjects(Item, bForceRefresh);
+	DetailsWidget->SetObject(Item, bForceRefresh);
 }
 
 EVisibility SAssetLoader::GetListZoneVisibility() const
