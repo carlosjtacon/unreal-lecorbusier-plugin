@@ -50,7 +50,7 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 
 		// Assets and Details
 		+ SVerticalBox::Slot()
-		.AutoHeight()
+		.FillHeight(1)
 		.Padding(5)
 		[
 			SNew(SAssetLoader)
@@ -59,7 +59,7 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 		// Build Environment Button
 		+ SVerticalBox::Slot()
 		.AutoHeight()
-		.Padding(5)
+		.Padding(10)
 		[
 			SNew(SBuildButton)
 			.IsEnabled_Static(&Locals::IsWidgetEnabled)

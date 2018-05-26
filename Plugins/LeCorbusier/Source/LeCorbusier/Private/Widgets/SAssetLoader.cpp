@@ -96,6 +96,8 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 		]
 
 		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(5)
 		[
 			SNew(SBorder)
 			[
@@ -128,6 +130,8 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 		]
 
 		+ SVerticalBox::Slot()
+		.FillHeight(1)
+		.Padding(5)
 		[
 			SNew(SBorder)
 			[
