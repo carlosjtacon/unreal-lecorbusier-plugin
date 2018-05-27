@@ -7,12 +7,13 @@
 #include "ULCAsset.generated.h"
 
 UENUM()
-enum class EAssetsType : uint8
+enum class EAssetType : uint8
 {
-	Nature,
-	Buildings,
-	Vehicles,
-	Props
+	/** Nature related assets */
+	Tree, Bush, Rock, Cabin, Ruins,
+	
+	/** City related assets */
+	Building, DetachedHouse, Monument, Streetlight, Vehicle
 };
 
 UCLASS()
@@ -21,54 +22,67 @@ class ULCAsset : public UObject
 	GENERATED_BODY()
 
 public:
+
+	ULCAsset(): 
+		bEnable(true),
+		MaxInstances(0),
+		Probability(0.7f),
+		Radius(0),
+		Scale(FFloatInterval(1,1)),
+		Rotation(FFloatInterval(0, 0)),
+		TranslationX(FFloatInterval(0, 0)),
+		TranslationY(FFloatInterval(0, 0)),
+		TranslationZ(FFloatInterval(0, 0))
+	{}
+	
 	UObject* Asset;
 
 	// OBJECT TYPE
 
 	/** Type of asset */
-	UPROPERTY(EditAnywhere, Category = Type)
-	EAssetsType AssetType;
+	UPROPERTY(EditAnywhere, Category = Type, meta = (DisplayName = "Type"))
+	EAssetType AssetType;
 
 
 	// GENERAL SETTINGS
 
 	/** Enable this asset */
 	UPROPERTY(EditAnywhere, Category = General, meta = (DisplayName = "Enable"))
-	uint32 bEnable : 1;
+	bool bEnable;
 
-	/** Only one instance */
-	UPROPERTY(EditAnywhere, Category = General)
-	uint32 Unique : 1;
+	/** Maximum number of instances generated. Zero is unlimited! */
+	UPROPERTY(EditAnywhere, Category = General, meta = (DisplayName = "Max. Instances", ClampMin = 0))
+	uint32 MaxInstances;
 	
 	/** Probability of appearance */
-	UPROPERTY(EditAnywhere, Category = General, meta = (DisplayName = "Probability", UIMin = 0, UIMax = 100))
+	UPROPERTY(EditAnywhere, Category = General, meta = (DisplayName = "Probability", ClampMin = 0, ClampMax = 1))
 	float Probability;
 
 
 	// PLACEMENT SETTINGS
 	
 	/** Minimum distance between instances */
-	UPROPERTY(EditAnywhere, Category = Placement, meta = (UIMin = 0, ClampMin = 0))
+	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Radius", ClampMin = 0))
 	float Radius;
 
 	/** Scale adjustment interval */
-	UPROPERTY(EditAnywhere, Category = Placement, meta = (UIMin = "0.001"))
+	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Scale"))
 	FFloatInterval Scale;
 
 	/** Rotation adjustment interval */
-	UPROPERTY(EditAnywhere, Category = Placement, meta = (UIMin = 0, UIMax = 360))
+	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Rotation"))
 	FFloatInterval Rotation;
 	
-	/** Translation adjustment interval (X) */
-	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Translation X", ClampMin = "0.001", UIMin = "0.001"))
+	/** Translation offset interval (X) */
+	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Translation X"))
 	FFloatInterval TranslationX;
 
-	/** Translation adjustment interval (Y) */
-	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Translation Y", ClampMin = "0.001", UIMin = "0.001"))
+	/** Translation offset interval (Y) */
+	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Translation Y"))
 	FFloatInterval TranslationY;
 
-	/** Translation adjustment interval (Z) */
-	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Translation X", ClampMin = "0.001", UIMin = "0.001"))
+	/** Translation offset interval (Z) */
+	UPROPERTY(EditAnywhere, Category = Placement, meta = (DisplayName = "Translation X"))
 	FFloatInterval TranslationZ;
 	
 };
