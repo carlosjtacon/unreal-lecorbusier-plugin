@@ -141,6 +141,19 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 	];
 }
 
+FReply SAssetLoader::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
+{
+	//if (UICommandList->ProcessCommandBindings(InKeyEvent))
+	if (InKeyEvent.GetKey() == EKeys::Delete)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Key Delete Pressed"));
+		SAssetLoader::DeleteSelectedAssetFromList();
+		return FReply::Handled();
+	}
+
+	return SCompoundWidget::OnKeyDown(MyGeometry, InKeyEvent);
+}
+
 TSharedRef<ITableRow> SAssetLoader::GenerateListRow(ULCAsset* Item, const TSharedRef<STableViewBase>& OwnerTable)
 {
 	return
@@ -208,6 +221,8 @@ FReply SAssetLoader::HandleAssetDropped(const FGeometry& DropZoneGeometry, const
 
 EVisibility SAssetLoader::GetDropZoneVisibility() const
 {
+	if (SAssetLoader::Items.Num() == 0) return EVisibility::Visible;
+
 	if (FSlateApplication::Get().IsDragDropping())
 	{
 		TArray<FAssetData> DraggedAssets = AssetUtil::ExtractAssetDataFromDrag(FSlateApplication::Get().GetDragDroppingContent());
@@ -216,6 +231,12 @@ EVisibility SAssetLoader::GetDropZoneVisibility() const
 	}
 
 	return EVisibility::Hidden;
+}
+
+void SAssetLoader::DeleteSelectedAssetFromList()
+{
+	Items.Remove(ListViewWidget->GetSelectedItems()[0]);
+	ListViewWidget->RequestListRefresh();
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
