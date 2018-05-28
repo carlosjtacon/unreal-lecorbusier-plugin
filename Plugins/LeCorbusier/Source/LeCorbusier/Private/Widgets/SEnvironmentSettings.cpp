@@ -69,13 +69,13 @@ void SEnvironmentSettings::Construct(const FArguments& InArgs)
 				+ SOverlay::Slot()
 				[
 					SNew(SVerticalBox)
+					.Visibility(this, &SEnvironmentSettings::GetRandomVisibility)
 
 					+ SVerticalBox::Slot()
 					.AutoHeight()
 					.Padding(5)
 					[
 						SNew(STextBlock)
-						.Visibility(this, &SEnvironmentSettings::GetRandomVisibility)
 						.Text(LOCTEXT("RandomSettings", "Random environment has no specific settings."))
 					]
 				]
@@ -84,14 +84,46 @@ void SEnvironmentSettings::Construct(const FArguments& InArgs)
 				+ SOverlay::Slot()
 				[
 					SNew(SVerticalBox)
+					.Visibility(this, &SEnvironmentSettings::GetCityVisibility)
 
 					+ SVerticalBox::Slot()
 					.AutoHeight()
 					.Padding(5)
 					[
-						SNew(STextBlock)
-						.Visibility(this, &SEnvironmentSettings::GetCityVisibility)
-						.Text(LOCTEXT("CitySettings", "City Settings"))
+						SNew(SHorizontalBox)
+
+						+ SHorizontalBox::Slot()
+						[
+							SNew(STextBlock)
+							.Text(LOCTEXT("CityNaturalAreas", "Number of Nature Areas"))
+						] 
+						
+						+ SHorizontalBox::Slot()
+						[
+							SAssignNew(CityNatureAreasSpinBox, SSpinBox<uint32>)
+							.MinValue(0)
+							.MaxValue(10)
+						]
+					]
+
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					.Padding(5)
+					[
+						SNew(SHorizontalBox)
+
+						+ SHorizontalBox::Slot()
+						[
+							SNew(STextBlock)
+							.Text(LOCTEXT("CityNaturalPercentage", "Percentage of Nature"))
+						]
+
+						+ SHorizontalBox::Slot()
+						[
+							SAssignNew(CityNaturePercentageSpinBox, SSpinBox<float>)
+							.MinValue(0)
+							.MaxValue(100)
+						]
 					]
 				]
 				
@@ -99,14 +131,17 @@ void SEnvironmentSettings::Construct(const FArguments& InArgs)
 				+ SOverlay::Slot()
 				[
 					SNew(SVerticalBox)
+					.Visibility(this, &SEnvironmentSettings::GetNatureVisibility)
 
 					+ SVerticalBox::Slot()
 					.AutoHeight()
 					.Padding(5)
 					[
-						SNew(STextBlock)
-						.Visibility(this, &SEnvironmentSettings::GetNatureVisibility)
-						.Text(LOCTEXT("NatureSettings", "Nature Settings"))
+						SAssignNew(NatureMixDifferentTreesCheckBox, SCheckBox)
+						[
+							SNew(STextBlock)
+							.Text(LOCTEXT("MixDifferentTrees", "Mix Different Types of Trees"))
+						]
 					]
 				]
 			]

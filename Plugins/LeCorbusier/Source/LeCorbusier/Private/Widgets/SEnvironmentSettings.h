@@ -23,6 +23,15 @@ public:
 private:
 	// Holds the combo box in the STextComboBox example.
 	TSharedPtr<STextComboBox> EnvironmentTypeComboBox;
+	
+	// Holds the check box for mixing different kind of trees
+	TSharedPtr<SCheckBox> NatureMixDifferentTreesCheckBox;
+
+	// Holds the spin box for number of nature areas inside the city
+	TSharedPtr<SSpinBox<uint32>> CityNatureAreasSpinBox;
+	
+	// Holds the spin box for the percentage of city used for nature areas
+	TSharedPtr<SSpinBox<float>> CityNaturePercentageSpinBox;
 
 	// Holds the selected item of the text combo box in the STextComboBox example.
 	TSharedPtr<FString> EnvironmentTypeComboBoxSelectedItem;
