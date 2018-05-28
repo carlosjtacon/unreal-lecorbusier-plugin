@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "Toolkits/BaseToolkit.h"
 
+#include "Widgets/SEnvironmentSettings.h"
+#include "Widgets/SAssetLoader.h"
+
 class FLeCorbusierEdModeToolkit : public FModeToolkit
 {
 public:
@@ -23,4 +26,8 @@ public:
 private:
 
 	TSharedPtr<SWidget> ToolkitWidget;
+	TSharedPtr<SEnvironmentSettings> EnvironmentSettingsWidget;
+	TSharedPtr<SAssetLoader> AssetLoaderWidget;
+
+	FReply DoBuildEnvironment();
 };

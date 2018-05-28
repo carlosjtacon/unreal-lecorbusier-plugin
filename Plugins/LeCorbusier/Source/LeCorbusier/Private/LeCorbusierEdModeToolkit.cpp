@@ -7,9 +7,6 @@
 #include "Widgets/Text/STextBlock.h"
 #include "EditorModeManager.h"
 
-#include "Widgets/SEnvironmentSettings.h"
-#include "Widgets/SAssetLoader.h"
-#include "Widgets/SBuildButton.h"
 
 #define LOCTEXT_NAMESPACE "FLeCorbusierEdModeToolkit"
 
@@ -45,7 +42,7 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 		.AutoHeight()
 		.Padding(5)
 		[
-			SNew(SEnvironmentSettings)
+			SAssignNew(EnvironmentSettingsWidget, SEnvironmentSettings)
 		]
 
 		// Assets and Details
@@ -53,7 +50,7 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 		.FillHeight(1)
 		.Padding(5)
 		[
-			SNew(SAssetLoader)
+			SAssignNew(AssetLoaderWidget, SAssetLoader)
 		]
 
 		// Build Environment Button
@@ -61,8 +58,10 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 		.AutoHeight()
 		.Padding(10)
 		[
-			SNew(SBuildButton)
+			SNew(SButton)
+			.Text(LOCTEXT("BuildButton", "Build Environment"))
 			.IsEnabled_Static(&Locals::IsWidgetEnabled)
+			.OnClicked(this, &FLeCorbusierEdModeToolkit::DoBuildEnvironment)
 		]
 
 	];
@@ -83,6 +82,12 @@ FText FLeCorbusierEdModeToolkit::GetBaseToolkitName() const
 class FEdMode* FLeCorbusierEdModeToolkit::GetEditorMode() const
 {
 	return GLevelEditorModeTools().GetActiveMode(FLeCorbusierEdMode::EM_LeCorbusierEdModeId);
+}
+
+FReply FLeCorbusierEdModeToolkit::DoBuildEnvironment()
+{
+	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT"));
+	return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE
