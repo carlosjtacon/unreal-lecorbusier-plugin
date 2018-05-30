@@ -3,12 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EditorModeManager.h"
 #include "Toolkits/BaseToolkit.h"
+#include "Engine/Selection.h"
+#include "Runtime/Engine/Classes/Engine/StaticMeshActor.h"
 
+#include "LeCorbusierEdMode.h"
 #include "Widgets/SEnvironmentSettings.h"
 #include "Widgets/SAssetLoader.h"
-
-#include "Runtime/Engine/Classes/Engine/StaticMeshActor.h"
 
 class FLeCorbusierEdModeToolkit : public FModeToolkit
 {

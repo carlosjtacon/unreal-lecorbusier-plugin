@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SEnvironmentSettings.h"
-#include "SlateOptMacros.h"
 
 #define LOCTEXT_NAMESPACE "FSEnvironmentSettings"
 

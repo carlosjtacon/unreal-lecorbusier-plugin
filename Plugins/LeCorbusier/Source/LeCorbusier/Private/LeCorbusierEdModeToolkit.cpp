@@ -1,12 +1,6 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "LeCorbusierEdModeToolkit.h"
-#include "LeCorbusierEdMode.h"
-#include "Engine/Selection.h"
-#include "Widgets/Input/SButton.h"
-#include "Widgets/Text/STextBlock.h"
-#include "EditorModeManager.h"
-
 
 #define LOCTEXT_NAMESPACE "FLeCorbusierEdModeToolkit"
 

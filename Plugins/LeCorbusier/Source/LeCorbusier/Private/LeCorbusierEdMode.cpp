@@ -1,9 +1,6 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "LeCorbusierEdMode.h"
-#include "LeCorbusierEdModeToolkit.h"
-#include "Toolkits/ToolkitManager.h"
-#include "EditorModeManager.h"
 
 const FEditorModeID FLeCorbusierEdMode::EM_LeCorbusierEdModeId = TEXT("EM_LeCorbusierEdMode");
 

@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "SlateBasics.h"
-//#include "SlateExtras.h"
-#include "Widgets/SCompoundWidget.h"
+#include "SlateOptMacros.h"
+#include "AssetSelection.h"
+#include "PropertyEditorModule.h"
+#include "IDetailsView.h"
 
 #include "../Types/ULCAsset.h"
 

@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 
+#include "LeCorbusierEdMode.h"
+
 class FLeCorbusierModule : public IModuleInterface
 {
 public:

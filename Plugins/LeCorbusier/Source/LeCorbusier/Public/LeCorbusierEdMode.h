@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "EdMode.h"
+#include "EditorModeManager.h"
+#include "Toolkits/ToolkitManager.h"
+
+#include "LeCorbusierEdModeToolkit.h"
 
 class FLeCorbusierEdMode : public FEdMode
 {

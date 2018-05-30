@@ -1,7 +1,6 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "LeCorbusier.h"
-#include "LeCorbusierEdMode.h"
 
 #define LOCTEXT_NAMESPACE "FLeCorbusierModule"
 

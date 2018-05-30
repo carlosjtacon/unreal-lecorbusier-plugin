@@ -1,13 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SAssetLoader.h"
-#include "SlateOptMacros.h"
-
-//#include "EditorStyleSet.h"
-//#include "ContentBrowserModule.h"
-#include "AssetSelection.h"
-#include "PropertyEditorModule.h"
-#include "IDetailsView.h"
 
 #define LOCTEXT_NAMESPACE "FSAssetLoader"
 

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "SlateBasics.h"
 #include "SlateExtras.h"
-#include "Widgets/SCompoundWidget.h"
+#include "SlateOptMacros.h"
 
 /**
  * 
