@@ -24,8 +24,9 @@ public:
 
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 
-private:
 	TArray<ULCAsset*> Items;
+
+private:
 	TSharedPtr<SListView<ULCAsset*>> ListViewWidget;
 	TSharedPtr<class IDetailsView> DetailsWidget;
 

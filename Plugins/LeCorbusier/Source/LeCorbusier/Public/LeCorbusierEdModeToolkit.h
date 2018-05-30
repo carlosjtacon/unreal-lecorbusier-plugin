@@ -8,6 +8,8 @@
 #include "Widgets/SEnvironmentSettings.h"
 #include "Widgets/SAssetLoader.h"
 
+#include "Runtime/Engine/Classes/Engine/StaticMeshActor.h"
+
 class FLeCorbusierEdModeToolkit : public FModeToolkit
 {
 public:

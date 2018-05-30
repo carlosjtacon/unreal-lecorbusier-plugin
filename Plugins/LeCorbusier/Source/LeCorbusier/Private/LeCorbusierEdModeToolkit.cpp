@@ -87,6 +87,45 @@ class FEdMode* FLeCorbusierEdModeToolkit::GetEditorMode() const
 FReply FLeCorbusierEdModeToolkit::DoBuildEnvironment()
 {
 	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT"));
+
+	UObject* AssetObject = AssetLoaderWidget->Items[0]->Asset;
+	UStaticMesh* myStaticMesh = Cast<UStaticMesh>(AssetObject);
+	//LCGen.PlacingStaticMesh(StaticMesh);
+
+	// Name & Transform
+	FVector objectPosition(0, 0, 0);
+	FRotator objectRotation(0, 0, 0); //in degrees
+	FVector objectScale(1, 1, 1);
+	FTransform objectTrasform(objectRotation, objectPosition, objectScale);
+
+	// Creating the Actor and Positioning it in the World based in the Static Mesh
+	// OLD // UWorld * currentWorld = GEditor->LevelViewportClients[0]->GetWorld();
+	// OLD // UWorld * currentWorld = GEditor->GetSelectedActors()->GetWorld();
+	UWorld* currentWorld = GEditor->GetEditorWorldContext().World();
+	// OLD // ULevel * currentLevel = currentWorld->GetLevel(0);
+	ULevel * currentLevel = currentWorld->GetCurrentLevel();
+	UClass * staticMeshClass = AStaticMeshActor::StaticClass();
+
+	// @ https://answers.unrealengine.com/questions/659521/geditor-addactor-crash.html?sort=oldest
+	//UWorld* const World = GEditor->GetEditorWorldContext().World();
+	//AStaticMeshActor* newmesh = Cast<AStaticMeshActor>(GEditor->AddActor(World->GetCurrentLevel(), AStaticMeshActor::StaticClass(), FTransform(FVector(0))));
+
+	AActor * newActorCreated = GEditor->AddActor(currentLevel, staticMeshClass, objectTrasform, true, RF_Public | RF_Standalone | RF_Transactional);
+	
+	AStaticMeshActor * smActor = Cast<AStaticMeshActor>(newActorCreated);
+
+	smActor->GetStaticMeshComponent()->SetStaticMesh(myStaticMesh);
+	smActor->SetActorScale3D(objectScale);
+	// ID Name & Visible Name
+	smActor->Rename(TEXT("MyStaticMeshInTheWorld"));
+	smActor->SetActorLabel("MyStaticMeshInTheWorld");
+
+	GEditor->EditorUpdateComponents();
+	smActor->GetStaticMeshComponent()->RegisterComponentWithWorld(currentWorld);
+	currentWorld->UpdateWorldComponents(true, false);
+	smActor->RerunConstructionScripts();
+	GLevelEditorModeTools().MapChangeNotify();
+
 	return FReply::Handled();
 }
 
