@@ -16,14 +16,6 @@ FLeCorbusierEdModeToolkit::FLeCorbusierEdModeToolkit()
 
 void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkitHost)
 {
-	struct Locals
-	{
-		static bool IsWidgetEnabled()
-		{
-			return GEditor->GetSelectedActors()->Num() == 1;
-		}
-	};
-
 	SAssignNew(ToolkitWidget, SBorder)
 	[
 		SNew(SVerticalBox)
@@ -60,7 +52,7 @@ void FLeCorbusierEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkit
 		[
 			SNew(SButton)
 			.Text(LOCTEXT("BuildButton", "Build Environment"))
-			.IsEnabled_Static(&Locals::IsWidgetEnabled)
+			.IsEnabled(this, &FLeCorbusierEdModeToolkit::BuildButtonEnabled)
 			.OnClicked(this, &FLeCorbusierEdModeToolkit::DoBuildEnvironment)
 		]
 
@@ -82,6 +74,12 @@ FText FLeCorbusierEdModeToolkit::GetBaseToolkitName() const
 class FEdMode* FLeCorbusierEdModeToolkit::GetEditorMode() const
 {
 	return GLevelEditorModeTools().GetActiveMode(FLeCorbusierEdMode::EM_LeCorbusierEdModeId);
+}
+
+bool FLeCorbusierEdModeToolkit::BuildButtonEnabled() const
+{
+	return GEditor->GetSelectedActors()->Num() == 1
+		&& AssetLoaderWidget->Items.Num() > 0;
 }
 
 FReply FLeCorbusierEdModeToolkit::DoBuildEnvironment()

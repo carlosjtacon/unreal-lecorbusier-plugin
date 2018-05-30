@@ -31,5 +31,6 @@ private:
 	TSharedPtr<SEnvironmentSettings> EnvironmentSettingsWidget;
 	TSharedPtr<SAssetLoader> AssetLoaderWidget;
 
+	bool BuildButtonEnabled() const;
 	FReply DoBuildEnvironment();
 };
