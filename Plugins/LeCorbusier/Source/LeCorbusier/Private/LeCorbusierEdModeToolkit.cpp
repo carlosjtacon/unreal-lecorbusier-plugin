@@ -78,12 +78,23 @@ bool FLeCorbusierEdModeToolkit::BuildButtonEnabled() const
 
 FReply FLeCorbusierEdModeToolkit::DoBuildEnvironment()
 {
-	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT"));
-
-	UObject* AssetObject = AssetLoaderWidget->Items[0]->Asset;
-	UStaticMesh* myStaticMesh = Cast<UStaticMesh>(AssetObject);
-	
-	LCGen.PlacingStaticMesh(myStaticMesh);
+	if (EnvironmentSettingsWidget->EnvironmentTypeComboBoxSelectedItem->Equals(TEXT("Random")))
+	{
+		LCGen.CreateEnvironmentRandom(AssetLoaderWidget->Items);
+	}
+	else if (EnvironmentSettingsWidget->EnvironmentTypeComboBoxSelectedItem->Equals(TEXT("City")))
+	{
+		uint32 NumNatureAreas = EnvironmentSettingsWidget->CityNatureAreasSpinBox->GetValue();
+		float NaturePercentage = EnvironmentSettingsWidget->CityNaturePercentageSpinBox->GetValue();
+		
+		LCGen.CreateEnvironmentCity(AssetLoaderWidget->Items, NumNatureAreas, NaturePercentage);
+	}
+	else if (EnvironmentSettingsWidget->EnvironmentTypeComboBoxSelectedItem->Equals(TEXT("Nature")))
+	{
+		bool bMixDifferentTrees = EnvironmentSettingsWidget->NatureMixDifferentTreesCheckBox->IsChecked();
+		
+		LCGen.CreateEnvironmentNature(AssetLoaderWidget->Items, bMixDifferentTrees);
+	}
 
 	return FReply::Handled();
 }
