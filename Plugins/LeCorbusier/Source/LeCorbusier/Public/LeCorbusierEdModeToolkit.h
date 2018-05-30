@@ -11,6 +11,7 @@
 #include "LeCorbusierEdMode.h"
 #include "Widgets/SEnvironmentSettings.h"
 #include "Widgets/SAssetLoader.h"
+#include "Generator/LCGenerator.h"
 
 class FLeCorbusierEdModeToolkit : public FModeToolkit
 {
@@ -28,6 +29,8 @@ public:
 	virtual TSharedPtr<class SWidget> GetInlineContent() const override { return ToolkitWidget; }
 
 private:
+
+	LCGenerator LCGen;
 
 	TSharedPtr<SWidget> ToolkitWidget;
 	TSharedPtr<SEnvironmentSettings> EnvironmentSettingsWidget;
