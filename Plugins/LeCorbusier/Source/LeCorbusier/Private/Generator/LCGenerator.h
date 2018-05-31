@@ -19,5 +19,5 @@ public:
 
 private:
 
-	void PlacingStaticMesh(UStaticMesh* myStaticMesh);
+	void PlacingStaticMesh(UStaticMesh* myStaticMesh, FTransform objectTrasform);
 };
