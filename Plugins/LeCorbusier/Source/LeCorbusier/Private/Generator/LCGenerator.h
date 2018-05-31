@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "EditorModeManager.h"
+#include "Editor.h"
+#include "Engine/Selection.h"
+#include "Editor/EditorEngine.h"
 #include "Runtime/Engine/Classes/Engine/StaticMeshActor.h"
 
 #include "../Types/ULCAsset.h"

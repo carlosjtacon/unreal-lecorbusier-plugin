@@ -1,19 +1,27 @@
 #include "LCGenerator.h"
 
+#define LOCTEXT_NAMESPACE "LCGeneratorNamespace"
+
 void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 {
 	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT RANDOM"));
+	// Let editor know that we're about to do something that we want to undo/redo
+	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
 
+	// Get selected actor as surface 
+	TArray< UObject* > SelectedActors;
+	GEditor->GetSelectedActors()->GetSelectedObjects(AActor::StaticClass(), SelectedActors);
+	AActor* SelectedActor = Cast<AActor>(SelectedActors[0]);
+	UE_LOG(LogTemp, Warning, TEXT("Building environment using %s as surface"), *SelectedActor->GetName());
+
+	
 	UObject* AssetObject = Items[0]->Asset;
 	UStaticMesh* myStaticMesh = Cast<UStaticMesh>(AssetObject);
-	
 	PlacingStaticMesh(myStaticMesh);
 
-	// create matrix ()
-	// generar una matriz del tamano de los bounds de la superficie seleccionada
-	// anadir en la matriz numeros que representan los items[0-n]
-	
-	// create environment ()
+
+	// We're done generating the environment so we close the transaction
+	GEditor->EndTransaction();
 }
 
 void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDifferentTrees)
@@ -56,3 +64,5 @@ void LCGenerator::PlacingStaticMesh(UStaticMesh* myStaticMesh)
 	smActor->RerunConstructionScripts();
 	GLevelEditorModeTools().MapChangeNotify();
 }
+
+#undef LOCTEXT_NAMESPACE
