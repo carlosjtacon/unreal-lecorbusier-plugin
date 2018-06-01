@@ -82,7 +82,7 @@ public:
 	FFloatInterval TranslationY;
 
 	/** Translation offset interval (Z) */
-	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Translation X"))
+	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Translation Z"))
 	FFloatInterval TranslationZ;
 	
 };

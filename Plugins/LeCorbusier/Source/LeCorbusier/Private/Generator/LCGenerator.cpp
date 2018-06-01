@@ -14,22 +14,9 @@ void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 	FBox FloorSurface = GetFloorSurface();
 	UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
 
-	// Get item from list
-	UObject* AssetObject = Items[0]->Asset;
-	UStaticMesh* MyStaticMesh = Cast<UStaticMesh>(AssetObject);
-	// PrintDebugUStaticMesh(MyStaticMesh);
-	
-	// Calculate needed variables
-	float RealObjectZ = FloorSurface.Min.Z - MyStaticMesh->GetBoundingBox().Min.Z;
-	
-	// Generate actor location, rotation and scale
-	FVector objectPosition(0, 0, RealObjectZ);
-	FRotator objectRotation(0, 0, 0);
-	FVector objectScale(1, 1, 1);
-	FTransform objectTrasform(objectRotation, objectPosition, objectScale);
-	
 	// Place actor into the level
-	PlacingStaticMesh(MyStaticMesh, objectTrasform);
+	FVector Position(0, 0, FloorSurface.Min.Z);
+	PlaceItemIntoLevel(Items[0], Position);
 
 	// We're done generating the environment so we close the transaction
 	GEditor->EndTransaction();
@@ -78,27 +65,41 @@ FBox LCGenerator::GetFloorSurface()
 	return FloorSurface;
 }
 
-void LCGenerator::PlacingStaticMesh(UStaticMesh* myStaticMesh, FTransform objectTrasform)
+void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position)
 {
+	UStaticMesh* MyStaticMesh = Cast<UStaticMesh>(Item->Asset);
+	// PrintDebugUStaticMesh(MyStaticMesh);
+
+	// Calculate real z position
+	float RealPositionX = Position.X;
+	float RealPositionY = Position.Y;
+	float RealPositionZ = Position.Z - MyStaticMesh->GetBoundingBox().Min.Z;
+
+	// Generate actor location, rotation and scale
+	float RotationYaw = MathAdvanced.FRandRange(Item->RotationZ.Min, Item->RotationZ.Max);
+	FRotator RandomRotation(0, RotationYaw, 0);
+	float PositionX = MathAdvanced.FRandRange(Item->TranslationX.Min, Item->TranslationX.Max);
+	float PositionY = MathAdvanced.FRandRange(Item->TranslationY.Min, Item->TranslationY.Max);
+	float PositionZ = MathAdvanced.FRandRange(Item->TranslationZ.Min, Item->TranslationZ.Max);
+	FVector RandomPosition(PositionX + RealPositionX, PositionY + RealPositionY, PositionZ + RealPositionZ);
+	float ScaleXYZ = MathAdvanced.FRandRange(Item->ScaleXYZ.Min, Item->ScaleXYZ.Max);
+	FVector RandomScale(ScaleXYZ, ScaleXYZ, ScaleXYZ);
+	FTransform ObjectTrasform(RandomRotation, RandomPosition, RandomScale);
+
 	// Creating the Actor and Positioning it in the World based in the Static Mesh
-	UWorld* currentWorld = GEditor->GetEditorWorldContext().World();
-	ULevel* currentLevel = currentWorld->GetCurrentLevel();
-	UClass* staticMeshClass = AStaticMeshActor::StaticClass();
+	UWorld* CurrentWorld = GEditor->GetEditorWorldContext().World();
+	ULevel* CurrentLevel = CurrentWorld->GetCurrentLevel();
+	AStaticMeshActor* NewActorCreated = Cast<AStaticMeshActor>(GEditor->AddActor(CurrentLevel, AStaticMeshActor::StaticClass(), ObjectTrasform, true, RF_Public | RF_Standalone | RF_Transactional));
 
-	AActor* newActorCreated = GEditor->AddActor(currentLevel, staticMeshClass, objectTrasform, true, RF_Public | RF_Standalone | RF_Transactional);
-	AStaticMeshActor* smActor = Cast<AStaticMeshActor>(newActorCreated);
-
-	smActor->GetStaticMeshComponent()->SetStaticMesh(myStaticMesh);
-	// smActor->SetActorScale3D(objectScale);
-	smActor->SetActorScale3D(objectTrasform.GetScale3D());
-	// ID Name & Visible Name
-	smActor->Rename(TEXT("MyStaticMeshInTheWorld"));
-	smActor->SetActorLabel("MyStaticMeshInTheWorld");
+	NewActorCreated->GetStaticMeshComponent()->SetStaticMesh(MyStaticMesh);
+	NewActorCreated->SetActorScale3D(ObjectTrasform.GetScale3D());
+	NewActorCreated->Rename(TEXT("MyStaticMeshInTheWorld"));
+	NewActorCreated->SetActorLabel("MyStaticMeshInTheWorld");
 
 	GEditor->EditorUpdateComponents();
-	smActor->GetStaticMeshComponent()->RegisterComponentWithWorld(currentWorld);
-	currentWorld->UpdateWorldComponents(true, false);
-	smActor->RerunConstructionScripts();
+	NewActorCreated->GetStaticMeshComponent()->RegisterComponentWithWorld(CurrentWorld);
+	CurrentWorld->UpdateWorldComponents(true, false);
+	NewActorCreated->RerunConstructionScripts();
 	GLevelEditorModeTools().MapChangeNotify();
 }
 

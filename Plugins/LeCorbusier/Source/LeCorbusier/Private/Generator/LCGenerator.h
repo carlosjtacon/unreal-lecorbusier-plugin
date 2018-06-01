@@ -26,7 +26,7 @@ private:
 
 	/** UTILS METHODS */
 	FBox GetFloorSurface();
-	void PlacingStaticMesh(UStaticMesh* myStaticMesh, FTransform objectTrasform);
+	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position);
 	
 	/** DEBUG METHODS */
 	void PrintDebugAActor(AActor* Actor);
