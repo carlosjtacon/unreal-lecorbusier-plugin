@@ -27,12 +27,12 @@ public:
 		bEnable(true),
 		MaxInstances(0),
 		Probability(0.7f),
-		Radius(0),
+		Radius(1),
 		ScaleXYZ(FFloatInterval(1,1)),
-		RotationZ(FFloatInterval(0, 0)),
-		TranslationX(FFloatInterval(0, 0)),
-		TranslationY(FFloatInterval(0, 0)),
-		TranslationZ(FFloatInterval(0, 0))
+		RotationZ(FFloatInterval(0,0)),
+		TranslationX(FFloatInterval(0,0)),
+		TranslationY(FFloatInterval(0,0)),
+		TranslationZ(FFloatInterval(0,0))
 	{}
 	
 	UObject* Asset;
@@ -59,7 +59,7 @@ public:
 	float Probability;
 
 	/** Minimum distance between instances */
-	UPROPERTY(EditAnywhere, Category = Instance , meta = (DisplayName = "Radius", ClampMin = 0))
+	UPROPERTY(EditAnywhere, Category = Instance , meta = (DisplayName = "Radius", ClampMin = 1))
 	float Radius;
 
 
