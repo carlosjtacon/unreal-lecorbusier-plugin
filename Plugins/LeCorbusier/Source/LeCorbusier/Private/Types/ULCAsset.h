@@ -50,7 +50,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = Instance, meta = (DisplayName = "Enable"))
 	bool bEnable;
 
-	/** Maximum number of instances generated. Zero is unlimited! */
+	/** Maximum number of instances generated (zero is unlimited!) */
 	UPROPERTY(EditAnywhere, Category = Instance, meta = (DisplayName = "Max. Instances", ClampMin = 0))
 	uint32 MaxInstances;
 	
@@ -58,9 +58,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = Instance, meta = (DisplayName = "Probability", ClampMin = 0, ClampMax = 1))
 	float Probability;
 
-	/** Minimum distance between instances */
+	/** Minimum distance between instances (unreal units)*/
 	UPROPERTY(EditAnywhere, Category = Instance , meta = (DisplayName = "Radius", ClampMin = 1))
-	float Radius;
+	uint32 Radius;
 
 
 	// TRANSFORMATION SETTINGS
