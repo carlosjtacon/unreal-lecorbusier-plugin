@@ -26,7 +26,7 @@ private:
 
 	/** UTILS METHODS */
 	FBox GetFloorSurface();
-	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position);
+	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name);
 	
 	/** DEBUG METHODS */
 	void PrintDebugAActor(AActor* Actor);

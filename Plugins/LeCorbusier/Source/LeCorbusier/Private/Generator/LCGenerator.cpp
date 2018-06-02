@@ -16,80 +16,107 @@ void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 
 	
 	// TODO: Matrix generation
+	// Unreal units = cm / Matrix units = m
+	int CONVERSION_FACTOR = 100;
 	TArray<TArray<ULCAsset*>> Matrix;
-	FVector MatrixSize = FloorSurface.GetSize();
+	FVector MatrixSize = FloorSurface.GetSize() / CONVERSION_FACTOR;
 	UE_LOG(LogTemp, Warning, TEXT("Matrix Size %s"), *MatrixSize.ToString());
 	Matrix.SetNum(MatrixSize.X); for (int i = 0; i < Matrix.Num(); i++) Matrix[i].SetNum(MatrixSize.Y);
 	
-
 	ULCAsset* EmptyItem = NewObject<ULCAsset>();
-	for (int i = 0; i < Matrix.Num(); i++)
-		for (int j = 0; j < Matrix[i].Num(); j++)
-			if (Matrix[i][j] == nullptr)
+	for(int i = 0; i < Items.Num(); i++)
+	{
+		uint32 ItemCount = 0;
+		ULCAsset* Item = Items[i];
+		for (int x = 0; x < Matrix.Num(); x+= Item->Radius)
+			for (int y = 0; y < Matrix[x].Num(); y += Item->Radius)
 			{
-				Matrix[i][j] = Items[0];
-				for (int i2 = 0; i2 < Matrix.Num(); i2++)
-					for (int j2 = 0; j2 < Matrix[i2].Num(); j2++)
-						if (FVector::Dist(FVector(i, j, 0), FVector(i2, j2, 0)) < Items[0]->Radius)
-							Matrix[i2][j2] = EmptyItem;
+				bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances >= ItemCount);
+				if (Item->bEnable && bInstancesAvailable)
+				{
+					if (Item->Probability > MathBasics.FRand())
+					{
+						Matrix[x][y] = Item;
+						ItemCount++;
+					}
+				}
 			}
+	}
 	
+	// for (int i = 0; i < Matrix.Num(); i++)
+	// {
+	// 	for (int j = 0; j < Matrix[i].Num(); j++)
+	// 	{
+	// 		if (Matrix[i][j] == nullptr)
+	// 		{
+	// 			//UE_LOG(LogTemp, Error, TEXT("Matrix[i][j] == nullptr"));
+	// 		 	Matrix[i][j] = Items[0];
+	// 			for (int i2 = 0; i2 < Matrix.Num(); i2++)
+	// 				for (int j2 = 0; j2 < Matrix[i2].Num(); j2++)
+	// 					if (FVector::Dist(FVector(i, j, 0), FVector(i2, j2, 0)) < Items[0]->Radius/FACTOR)
+	// 						Matrix[i2][j2] = EmptyItem;
+	// 		}
+	// 	}
+	// }
+
 	for (int i = 0; i < Matrix.Num(); i++)
 		for (int j = 0; j < Matrix[i].Num(); j++)
 			if (Matrix[i][j] != EmptyItem && IsValid(Matrix[i][j]))
 			{
-				FVector Position(0, 0, FloorSurface.Min.Z);
-				// PlaceItemIntoLevel(Items[0], Position, Name); // Name can be SelectedActorName+Random/City/Nature+[Row][Col]
+				FVector Position(FloorSurface.Min.X + i*CONVERSION_FACTOR, FloorSurface.Max.Y - j*CONVERSION_FACTOR, FloorSurface.Min.Z);
+				FString Name = Matrix[i][j]->GetName() + FString::FromInt(i) + FString::FromInt(j); // Name could be SelectedActorName+Random/City/Nature+[Row][Col]
+				PlaceItemIntoLevel(Matrix[i][j], Position, Name);
 			}
 	
-			/* DEBUG MATRIX */
-	int Row = 0, Col = 0;
-	for (int i = 0; i < Matrix.Num(); i++) Row++;
-	for (int j = 0; j < Matrix[0].Num(); j++) Col++;
-	UE_LOG(LogTemp, Warning, TEXT("Matrix %dx%d"), Row, Col);
+	/* DEBUG MATRIX */
+	// int Row = 0, Col = 0;
+	// for (int i = 0; i < Matrix.Num(); i++) Row++;
+	// for (int j = 0; j < Matrix[0].Num(); j++) Col++;
+	// UE_LOG(LogTemp, Warning, TEXT("Matrix %dx%d"), Row, Col);
 	
-	Matrix[0][0] = Items[0];
-	UE_LOG(LogTemp, Error, TEXT("Matrix[0][0] = Items[0];"));
-	if (Matrix[0][0])
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0]"));
-	if (Matrix[0][0] != nullptr)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0] != nullptr"));
-	if (Matrix[0][0] == nullptr)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0] == nullptr"));
-	if (IsValid(Matrix[0][0]))
-		UE_LOG(LogTemp, Warning, TEXT("IsValid(Matrix[0][0])"));
-	if (Matrix[0][0] == EmptyItem)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0] == EmptyItem"));
+	// Matrix[0][0] = Items[0];
+	// UE_LOG(LogTemp, Error, TEXT("Matrix[0][0] = Items[0];"));
+	// if (Matrix[0][0])
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0]"));
+	// if (Matrix[0][0] != nullptr)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0] != nullptr"));
+	// if (Matrix[0][0] == nullptr)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0] == nullptr"));
+	// if (IsValid(Matrix[0][0]))
+	// 	UE_LOG(LogTemp, Warning, TEXT("IsValid(Matrix[0][0])"));
+	// if (Matrix[0][0] == EmptyItem)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][0] == EmptyItem"));
 
-	Matrix[0][1] = EmptyItem;
-	UE_LOG(LogTemp, Error, TEXT("Matrix[0][1] = nullptr;"));
-	if (Matrix[0][1])
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1]"));
-	if (Matrix[0][1] != nullptr)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1] != nullptr"));
-	if (Matrix[0][1] == nullptr)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1] == nullptr"));
-	if (IsValid(Matrix[0][1]))
-		UE_LOG(LogTemp, Warning, TEXT("IsValid(Matrix[0][1])"));
-	if (Matrix[0][1] == EmptyItem)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1] == EmptyItem"));
+	// Matrix[0][1] = EmptyItem;
+	// UE_LOG(LogTemp, Error, TEXT("Matrix[0][1] = nullptr;"));
+	// if (Matrix[0][1])
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1]"));
+	// if (Matrix[0][1] != nullptr)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1] != nullptr"));
+	// if (Matrix[0][1] == nullptr)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1] == nullptr"));
+	// if (IsValid(Matrix[0][1]))
+	// 	UE_LOG(LogTemp, Warning, TEXT("IsValid(Matrix[0][1])"));
+	// if (Matrix[0][1] == EmptyItem)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[0][1] == EmptyItem"));
 		
-	UE_LOG(LogTemp, Error, TEXT("Matrix[1][1] (auto) as nullptr;"));
-	if (Matrix[1][1])
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1]"));
-	if (Matrix[1][1] != nullptr)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1] != nullptr"));
-	if (Matrix[1][1] == nullptr)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1] == nullptr"));
-	if (IsValid(Matrix[1][1]))
-		UE_LOG(LogTemp, Warning, TEXT("IsValid(Matrix[1][1])"));
-	if (Matrix[1][1] == EmptyItem)
-		UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1] == EmptyItem"));
+	// UE_LOG(LogTemp, Error, TEXT("Matrix[1][1] (auto) as nullptr;"));
+	// if (Matrix[1][1])
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1]"));
+	// if (Matrix[1][1] != nullptr)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1] != nullptr"));
+	// if (Matrix[1][1] == nullptr)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1] == nullptr"));
+	// if (IsValid(Matrix[1][1]))
+	// 	UE_LOG(LogTemp, Warning, TEXT("IsValid(Matrix[1][1])"));
+	// if (Matrix[1][1] == EmptyItem)
+	// 	UE_LOG(LogTemp, Warning, TEXT("Matrix[1][1] == EmptyItem"));
 	/* DEBUG MATRIX */
 
 	// Place actor into the level
 	// FVector Position(0, 0, FloorSurface.Min.Z);
-	// PlaceItemIntoLevel(Items[0], Position);
+	// FString Name = Items[0]->Asset->GetName();
+	// PlaceItemIntoLevel(Items[0], Position, Name);
 
 	// We're done generating the environment so we close the transaction
 	GEditor->EndTransaction();
@@ -138,7 +165,7 @@ FBox LCGenerator::GetFloorSurface()
 	return FloorSurface;
 }
 
-void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position)
+void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name)
 {
 	UStaticMesh* MyStaticMesh = Cast<UStaticMesh>(Item->Asset);
 	// PrintDebugUStaticMesh(MyStaticMesh);
@@ -166,8 +193,8 @@ void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position)
 
 	NewActorCreated->GetStaticMeshComponent()->SetStaticMesh(MyStaticMesh);
 	NewActorCreated->SetActorScale3D(ObjectTrasform.GetScale3D());
-	NewActorCreated->Rename(TEXT("MyStaticMeshInTheWorld"));
-	NewActorCreated->SetActorLabel("MyStaticMeshInTheWorld");
+	//NewActorCreated->Rename(TEXT(Name));
+	NewActorCreated->SetActorLabel(Name);
 
 	GEditor->EditorUpdateComponents();
 	NewActorCreated->GetStaticMeshComponent()->RegisterComponentWithWorld(CurrentWorld);
