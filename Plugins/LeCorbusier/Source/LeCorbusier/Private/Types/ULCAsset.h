@@ -9,6 +9,8 @@
 UENUM()
 enum class EAssetType : uint8
 {
+	None,
+	
 	/** Nature related assets */
 	Tree, Bush, Rock, Cabin, Ruins,
 	
