@@ -27,14 +27,14 @@ void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 	{
 		uint32 ItemCount = 0;
 		ULCAsset* Item = Items[i];
-		int32 GridRadius = MathBasics.CeilToInt(Item->Radius / CONVERSION_FACTOR);
+		int32 GridRadius = FGenericPlatformMath::CeilToInt(Item->Radius / CONVERSION_FACTOR);
 		for (int x = 0; x < Matrix.Num(); x+= GridRadius)
 			for (int y = 0; y < Matrix[x].Num(); y += GridRadius)
 			{
 				bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > ItemCount);
 				if (Item->bEnable && bInstancesAvailable && Matrix[x][y] == nullptr)
 				{
-					if (Item->Probability > MathBasics.FRand())
+					if (Item->Probability > FGenericPlatformMath::FRand())
 					{
 						Matrix[x][y] = Item;
 						ItemCount++;
@@ -79,8 +79,8 @@ void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDiff
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
 	for (int i = 0; i < 20; i++)
 	{
-		float X = MathAdvanced.FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X);
-		float Y = MathAdvanced.FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y);
+		float X = FMath::FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X);
+		float Y = FMath::FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y);
 		TLCParticle Particle(FVector2D(X, Y), 10);
 		QuadTree.Insert(Particle);
 		UE_LOG(LogTemp, Warning, TEXT("Inserted Particle: %s"), *Particle.ToString());
@@ -145,11 +145,11 @@ void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString N
 	UStaticMesh* MyStaticMesh = Cast<UStaticMesh>(Item->Asset); // PrintDebugUStaticMesh(MyStaticMesh);
 	
 	// Generate random transformation with the intervals
-	float RandomScaleXYZ = MathAdvanced.FRandRange(Item->ScaleXYZ.Min, Item->ScaleXYZ.Max);
-	float RandomPositionX = MathAdvanced.FRandRange(Item->TranslationX.Min, Item->TranslationX.Max);
-	float RandomPositionY = MathAdvanced.FRandRange(Item->TranslationY.Min, Item->TranslationY.Max);
-	float RandomPositionZ = MathAdvanced.FRandRange(Item->TranslationZ.Min, Item->TranslationZ.Max);
-	float RandomRotationYaw = MathAdvanced.FRandRange(Item->RotationZ.Min, Item->RotationZ.Max);
+	float RandomScaleXYZ = FMath::FRandRange(Item->ScaleXYZ.Min, Item->ScaleXYZ.Max);
+	float RandomPositionX = FMath::FRandRange(Item->TranslationX.Min, Item->TranslationX.Max);
+	float RandomPositionY = FMath::FRandRange(Item->TranslationY.Min, Item->TranslationY.Max);
+	float RandomPositionZ = FMath::FRandRange(Item->TranslationZ.Min, Item->TranslationZ.Max);
+	float RandomRotationYaw = FMath::FRandRange(Item->RotationZ.Min, Item->RotationZ.Max);
 
 	// Generate final actor transformation
 	FVector RandomPosition(RandomPositionX, RandomPositionY, RandomPositionZ);

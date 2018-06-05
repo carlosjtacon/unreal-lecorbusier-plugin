@@ -22,9 +22,6 @@ public:
 
 private:
 
-	FMath MathAdvanced;
-	FGenericPlatformMath MathBasics;
-
 	/** UTILS METHODS */
 	FBox GetFloorSurface();
 	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name);
