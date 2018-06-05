@@ -63,7 +63,43 @@ void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDifferentTrees)
 {
 	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT NATURE (bMixDifferentTrees: %s)"), (bMixDifferentTrees ? TEXT("True") : TEXT("False")));
+	// Let editor know that we're about to do something that we want to undo/redo
+	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
 
+	// Get surface coordinates
+	FBox FloorSurface = GetFloorSurface();
+	FBox2D FloorSurface2D(FVector2D(FloorSurface.Min.X, FloorSurface.Min.Y), FVector2D(FloorSurface.Max.X, FloorSurface.Max.Y));
+	UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
+
+	
+	//todo: cogemos un punto random en el qtree, si en un radio X encontramos otro arbol 
+	//hay una probabilidad muy grande de que caiga, si no hay una probabilidad muy peque�a
+	//radius necesario?
+
+	TLCQuadTree QuadTree(FloorSurface2D, 4);
+	for (int i = 0; i < 20; i++)
+	{
+		float X = MathAdvanced.FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X);
+		float Y = MathAdvanced.FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y);
+		TLCParticle Particle(FVector2D(X, Y), 10);
+		QuadTree.Insert(Particle);
+		UE_LOG(LogTemp, Warning, TEXT("Inserted Particle: %s"), *Particle.ToString());
+	}
+	
+	TArray<TLCParticle> Particles;
+	QuadTree.Query(FloorSurface2D, Particles);
+	UE_LOG(LogTemp, Warning, TEXT("(Box) There are %d particles in the QuadTree"), Particles.Num());
+
+	Particles.Empty();
+	TLCParticle Circle(FloorSurface2D.GetCenter(), FloorSurface2D.GetExtent().X);
+	QuadTree.Query(Circle, Particles);
+	UE_LOG(LogTemp, Warning, TEXT("(Circle) There are %d particles in the QuadTree"), Particles.Num());
+
+
+
+
+	// We're done generating the environment so we close the transaction
+	GEditor->EndTransaction();
 }
 
 void LCGenerator::CreateEnvironmentCity(TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage)

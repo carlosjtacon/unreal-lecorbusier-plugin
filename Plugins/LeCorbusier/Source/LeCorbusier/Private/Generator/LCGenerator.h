@@ -9,6 +9,7 @@
 #include "Runtime/Engine/Classes/Engine/TriggerBox.h"
 
 #include "../Types/ULCAsset.h"
+#include "../Types/TLCQuadTree.h"
 
 class LCGenerator
 {
