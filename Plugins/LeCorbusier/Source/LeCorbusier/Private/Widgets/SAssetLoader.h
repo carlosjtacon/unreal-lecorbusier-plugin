@@ -8,6 +8,8 @@
 #include "AssetSelection.h"
 #include "PropertyEditorModule.h"
 #include "IDetailsView.h"
+#include "Engine/StaticMesh.h"
+
 
 #include "../Types/ULCAsset.h"
 

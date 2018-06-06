@@ -7,7 +7,7 @@
 // Asset Drag and Drop Zone
 class SAssetDragDropZone : public SCompoundWidget
 {
-	public:
+public:
 	SLATE_BEGIN_ARGS(SAssetDragDropZone) {}
 		SLATE_EVENT(FOnDrop, OnDrop)
 	SLATE_END_ARGS()
@@ -183,29 +183,20 @@ FReply SAssetLoader::HandleAssetDropped(const FGeometry& DropZoneGeometry, const
 	TArray<FAssetData> DroppedAssetData = AssetUtil::ExtractAssetDataFromDrag(DragDropEvent);
 	if (DroppedAssetData.Num() > 0)
 	{
-		// Treat the entire drop as a transaction (in case multiples types are being added)
-		// const FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "FoliageMode_DragDropTypesTransaction", "Drag-drop Foliage"));
-
 		for (auto& AssetData : DroppedAssetData)
 		{
-			// if (AddFoliageTypeCombo.IsValid())
-			// {
-			// 	AddFoliageTypeCombo->SetIsOpen(false);
-			// }
-
-			// GWarn->BeginSlowTask(LOCTEXT("AddFoliageType_LoadPackage", "Loading Foliage Type"), true, false);
 			ULCAsset* Obj = NewObject<ULCAsset>();
 			Obj->Asset = AssetData.GetAsset();
-			// UObject* Asset = AssetData.GetAsset();
+			
+			// Calculate radius auto
+			UStaticMesh* StaticMesh = Cast<UStaticMesh>(Obj->Asset);
+			FVector AssetSize = StaticMesh->GetBoundingBox().GetSize();
+			float AutoRadius = (AssetSize.X > AssetSize.Y) ? AssetSize.X : AssetSize.Y;
+			Obj->Radius = AutoRadius;
 
 			SAssetLoader::Items.Add(Obj);
 			UE_LOG(LogTemp, Warning, TEXT("Dropped AssetData"));
 			ListViewWidget->RequestListRefresh();
-			// AssetData.PrintAssetData();
-
-			// GWarn->EndSlowTask();
-
-			// FoliageEditMode->AddFoliageAsset(Asset);
 		}
 	}
 

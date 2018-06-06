@@ -62,21 +62,21 @@ public:
 
 	/** Minimum distance between instances (unreal units)*/
 	UPROPERTY(EditAnywhere, Category = Instance , meta = (DisplayName = "Radius", ClampMin = 1))
-	uint32 Radius;
+	float Radius;
 
 
 	// TRANSFORMATION SETTINGS
 
 	/** Scale adjustment interval (XYZ) */
-	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Scale"))
+	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Scale", UIMin = 0, ClampMin = 0))
 	FFloatInterval ScaleXYZ;
 
 	/** Rotation adjustment interval (Z) */
-	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Rotation"))
+	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Rotation", UIMin = 0, ClampMin = 0, UIMax = 360, ClampMax = 360))
 	FFloatInterval RotationZ;
 	
 	/** Translation offset interval (X) */
-	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Translation X"))
+	UPROPERTY(EditAnywhere, Category = Transformation, meta = (DisplayName = "Translation X")) 	
 	FFloatInterval TranslationX;
 
 	/** Translation offset interval (Y) */

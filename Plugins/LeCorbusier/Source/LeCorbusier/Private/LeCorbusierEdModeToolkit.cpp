@@ -84,16 +84,11 @@ FReply FLeCorbusierEdModeToolkit::DoBuildEnvironment()
 	}
 	else if (EnvironmentSettingsWidget->EnvironmentTypeComboBoxSelectedItem->Equals(TEXT("City")))
 	{
-		uint32 NumNatureAreas = EnvironmentSettingsWidget->CityNatureAreasSpinBox->GetValue();
-		float NaturePercentage = EnvironmentSettingsWidget->CityNaturePercentageSpinBox->GetValue();
-		
-		LCGen.CreateEnvironmentCities(AssetLoaderWidget->Items, NumNatureAreas, NaturePercentage);
+		LCGen.CreateEnvironmentCities(AssetLoaderWidget->Items, EnvironmentSettingsWidget->SettingsCity);
 	}
 	else if (EnvironmentSettingsWidget->EnvironmentTypeComboBoxSelectedItem->Equals(TEXT("Nature")))
-	{
-		bool bMixDifferentTrees = EnvironmentSettingsWidget->NatureMixDifferentTreesCheckBox->IsChecked();
-		
-		LCGen.CreateEnvironmentNature(AssetLoaderWidget->Items, bMixDifferentTrees);
+	{		
+		LCGen.CreateEnvironmentNature(AssetLoaderWidget->Items, EnvironmentSettingsWidget->SettingsNature);
 	}
 
 	return FReply::Handled();

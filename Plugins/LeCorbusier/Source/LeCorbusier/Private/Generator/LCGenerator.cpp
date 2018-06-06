@@ -22,9 +22,9 @@ void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 	GEditor->EndTransaction();
 }
 
-void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDifferentTrees)
+void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, ULCSettingsNature* Settings)
 {
-	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT NATURE (bMixDifferentTrees: %s)"), (bMixDifferentTrees ? TEXT("True") : TEXT("False")));
+	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT NATURE (%s)"), *Settings->ToString());
 	// Let editor know that we're about to do something that we want to undo/redo
 	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
 
@@ -33,16 +33,16 @@ void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDiff
 	FBox2D FloorSurface2D(FVector2D(FloorSurface.Min.X, FloorSurface.Min.Y), FVector2D(FloorSurface.Max.X, FloorSurface.Max.Y));
 
 	// Generate random environment
-	TLCQuadTree QuadTree = CreateQuadTreeNature(FloorSurface2D, Items, bMixDifferentTrees);
+	TLCQuadTree QuadTree = CreateQuadTreeNature(FloorSurface2D, Items, Settings);
 	PlaceQuadTreeIntoLevel(QuadTree, FloorSurface.Min.Z);
 	
 	// We're done generating the environment so we close the transaction
 	GEditor->EndTransaction();
 }
 
-void LCGenerator::CreateEnvironmentCities(TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage)
+void LCGenerator::CreateEnvironmentCities(TArray<ULCAsset*> Items, ULCSettingsCity* Settings)
 {
-	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT CITY (NumNatureAreas: %d, NaturePercentage: %f)"), NumNatureAreas, NaturePercentage);
+	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT CITY (%s)"), *Settings->ToString());
 	// Let editor know that we're about to do something that we want to undo/redo
 	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
 
@@ -51,7 +51,7 @@ void LCGenerator::CreateEnvironmentCities(TArray<ULCAsset*> Items, uint32 NumNat
 	FBox2D FloorSurface2D(FVector2D(FloorSurface.Min.X, FloorSurface.Min.Y), FVector2D(FloorSurface.Max.X, FloorSurface.Max.Y));
 
 	// Generate random environment
-	TLCQuadTree QuadTree = CreateQuadTreeCities(FloorSurface2D, Items, NumNatureAreas, NaturePercentage);
+	TLCQuadTree QuadTree = CreateQuadTreeCities(FloorSurface2D, Items, Settings);
 	PlaceQuadTreeIntoLevel(QuadTree, FloorSurface.Min.Z);
 
 	// We're done generating the environment so we close the transaction
@@ -100,22 +100,20 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 	return QuadTree;
 }
 
-TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, bool bMixDifferentTrees)
+TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsNature* Settings)
 {
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
 
-	//todo: cogemos un punto random en el qtree, si en un radio X encontramos otro arbol 
-	//hay una probabilidad muy grande de que caiga, si no hay una probabilidad muy peque�a
-	//radius necesario?
+	//todo: generate nature area
 
 	return QuadTree;
 }
 
-TLCQuadTree LCGenerator::CreateQuadTreeCities(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage)
+TLCQuadTree LCGenerator::CreateQuadTreeCities(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsCity* Settings)
 {
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
 
-	//todo: generar parcelas de la ciudad
+	//todo: generate city area
 
 	return QuadTree;
 }

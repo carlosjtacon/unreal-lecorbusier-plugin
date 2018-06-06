@@ -9,6 +9,8 @@
 #include "Runtime/Engine/Classes/Engine/TriggerBox.h"
 
 #include "../Types/ULCAsset.h"
+#include "../Types/ULCSettingsCity.h"
+#include "../Types/ULCSettingsNature.h"
 #include "../Types/TLCQuadTree.h"
 
 class LCGenerator
@@ -17,8 +19,8 @@ public:
 
 	/** AVAILABLE ALGORITHMS */
 	void CreateEnvironmentRandom(TArray<ULCAsset*> Items);
-	void CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDifferentTrees);
-	void CreateEnvironmentCities(TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage);
+	void CreateEnvironmentNature(TArray<ULCAsset*> Items, ULCSettingsNature* Settings);
+	void CreateEnvironmentCities(TArray<ULCAsset*> Items, ULCSettingsCity* Settings);
 
 private:
 
@@ -27,8 +29,8 @@ private:
 
 	/** AUXILIAR METHODS FOR ALGORITHMS */
 	TLCQuadTree CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCAsset*> Items);
-	TLCQuadTree CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, bool bMixDifferentTrees);
-	TLCQuadTree CreateQuadTreeCities(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage);
+	TLCQuadTree CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsNature* Settings);
+	TLCQuadTree CreateQuadTreeCities(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsCity* Settings);
 
 	/** UTILS METHODS */
 	FBox GetFloorSurface();

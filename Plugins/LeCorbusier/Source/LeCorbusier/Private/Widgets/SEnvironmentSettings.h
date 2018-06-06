@@ -6,6 +6,11 @@
 #include "SlateBasics.h"
 #include "SlateExtras.h"
 #include "SlateOptMacros.h"
+#include "PropertyEditorModule.h"
+#include "IDetailsView.h"
+
+#include "../Types/ULCSettingsNature.h"
+#include "../Types/ULCSettingsCity.h"
 
 /**
  * 
@@ -23,15 +28,10 @@ public:
 
 	// Environment type selected
 	TSharedPtr<FString> EnvironmentTypeComboBoxSelectedItem;
-	
-	// Nature settings widget: mix different kind of trees
-	TSharedPtr<SCheckBox> NatureMixDifferentTreesCheckBox;
 
-	// City settings widget: number of nature areas inside the city
-	TSharedPtr<SSpinBox<uint32>> CityNatureAreasSpinBox;
-
-	// City settings widget: percentage of city used for nature areas
-	TSharedPtr<SSpinBox<float>> CityNaturePercentageSpinBox;
+	// Environment Settings
+	ULCSettingsNature* SettingsNature;
+	ULCSettingsCity* SettingsCity;
 
 private:
 
@@ -41,6 +41,10 @@ private:
 
 	// Callback for selection changes in the environment combo box
 	void HandleTextComboBoxSelectionChanged (TSharedPtr<FString> NewSelection, ESelectInfo::Type SelectInfo);
+
+	// Settings details view
+	TSharedPtr<class IDetailsView> SettingsNatureWidget;
+	TSharedPtr<class IDetailsView> SettingsCityWidget;
 
 	// Visibility delegates for type-specific settings
 	EVisibility GetRandomVisibility() const;

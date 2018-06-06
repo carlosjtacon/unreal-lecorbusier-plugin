@@ -8,6 +8,17 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SEnvironmentSettings::Construct(const FArguments& InArgs)
 {
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FDetailsViewArgs Args(false, false, false, FDetailsViewArgs::HideNameArea, true); Args.bShowScrollBar = false;
+	
+	SettingsNature = NewObject<ULCSettingsNature>();
+	SettingsNatureWidget = PropertyModule.CreateDetailView(Args);
+	SettingsNatureWidget->SetObject(SettingsNature, true);
+	
+	SettingsCity = NewObject<ULCSettingsCity>();
+	SettingsCityWidget = PropertyModule.CreateDetailView(Args);
+	SettingsCityWidget->SetObject(SettingsCity, true);
+
 	{
 		EnvironmentTypeComboBoxSelectedItem = MakeShareable(new FString(TEXT("Random")));
 		
@@ -87,43 +98,10 @@ void SEnvironmentSettings::Construct(const FArguments& InArgs)
 
 					+ SVerticalBox::Slot()
 					.AutoHeight()
-					.Padding(5)
 					[
-						SNew(SHorizontalBox)
-
-						+ SHorizontalBox::Slot()
-						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("CityNaturalAreas", "Number of Nature Areas"))
-						] 
-						
-						+ SHorizontalBox::Slot()
-						[
-							SAssignNew(CityNatureAreasSpinBox, SSpinBox<uint32>)
-							.MinValue(0)
-							.MaxValue(10)
-						]
+						SettingsCityWidget.ToSharedRef()
 					]
 
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					.Padding(5)
-					[
-						SNew(SHorizontalBox)
-
-						+ SHorizontalBox::Slot()
-						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("CityNaturalPercentage", "Percentage of Nature"))
-						]
-
-						+ SHorizontalBox::Slot()
-						[
-							SAssignNew(CityNaturePercentageSpinBox, SSpinBox<float>)
-							.MinValue(0)
-							.MaxValue(100)
-						]
-					]
 				]
 				
 				// Nature
@@ -134,13 +112,8 @@ void SEnvironmentSettings::Construct(const FArguments& InArgs)
 
 					+ SVerticalBox::Slot()
 					.AutoHeight()
-					.Padding(5)
 					[
-						SAssignNew(NatureMixDifferentTreesCheckBox, SCheckBox)
-						[
-							SNew(STextBlock)
-							.Text(LOCTEXT("MixDifferentTrees", "Mix Different Types of Trees"))
-						]
+						SettingsNatureWidget.ToSharedRef()
 					]
 				]
 			]
