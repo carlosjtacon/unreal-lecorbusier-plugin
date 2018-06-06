@@ -71,31 +71,57 @@ void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDiff
 	FBox2D FloorSurface2D(FVector2D(FloorSurface.Min.X, FloorSurface.Min.Y), FVector2D(FloorSurface.Max.X, FloorSurface.Max.Y));
 	UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
 
-	
+
 	//todo: cogemos un punto random en el qtree, si en un radio X encontramos otro arbol 
 	//hay una probabilidad muy grande de que caiga, si no hay una probabilidad muy peque�a
 	//radius necesario?
-
+	
+	uint32 NUM_FAILURES = 15;
+	
+	uint32 Failures = 0; 
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
-	for (int i = 0; i < 20; i++)
-	{
-		float X = FMath::FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X);
-		float Y = FMath::FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y);
-		TLCParticle Particle(FVector2D(X, Y), 10);
-		QuadTree.Insert(Particle);
-		UE_LOG(LogTemp, Warning, TEXT("Inserted Particle: %s"), *Particle.ToString());
+	TArray<uint32> MaxItemInstances;
+	for (int i = 0; i < Items.Num(); i++) MaxItemInstances.Add(0);
+	
+	while(Failures < NUM_FAILURES){
+		
+		int32 RandomItemNum = FMath::RandRange(0, Items.Num() - 1);
+		ULCAsset* Item = Items[RandomItemNum];
+		bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > MaxItemInstances[RandomItemNum]);
+
+		TArray<TLCParticle> CollisionParticles;
+		if (Item->bEnable && bInstancesAvailable)
+		{
+			FVector2D RandomPosition(FMath::FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X), FMath::FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y));
+			TLCParticle Particle(RandomPosition, Item->Radius); Particle.Item = Item;
+
+			QuadTree.Query(Particle, CollisionParticles);
+
+			bool ProbabilitySuccess = Item->Probability > FGenericPlatformMath::FRand();
+
+			if (CollisionParticles.Num() == 0 && ProbabilitySuccess)
+			{
+				QuadTree.Insert(Particle);
+				if (Failures > 0) Failures--;
+				continue;
+			}
+		}
+		
+		if(!bInstancesAvailable || CollisionParticles.Num() != 0 ) Failures++;
+			
 	}
 	
-	TArray<TLCParticle> Particles;
-	QuadTree.Query(FloorSurface2D, Particles);
-	UE_LOG(LogTemp, Warning, TEXT("(Box) There are %d particles in the QuadTree"), Particles.Num());
+	TArray<TLCParticle> FinalParticles;
+	QuadTree.Query(FloorSurface2D, FinalParticles);
+	UE_LOG(LogTemp, Error, TEXT("There are %d final particles in the QuadTree"), FinalParticles.Num());
 
-	Particles.Empty();
-	TLCParticle Circle(FloorSurface2D.GetCenter(), FloorSurface2D.GetExtent().X);
-	QuadTree.Query(Circle, Particles);
-	UE_LOG(LogTemp, Warning, TEXT("(Circle) There are %d particles in the QuadTree"), Particles.Num());
-
-
+	// Place items stored in quadtree into the world
+	for (int i = 0; i < FinalParticles.Num(); i++)
+	{
+		FVector Position(FinalParticles[i].Center.X, FinalParticles[i].Center.Y, FloorSurface.Min.Z);
+		FString Name = FinalParticles[i].Item->Asset->GetName() + FString::FromInt(i); // Name could be SelectedActorName+Random/City/Nature+[Row][Col]
+		PlaceItemIntoLevel(FinalParticles[i].Item, Position, Name);
+	}
 
 
 	// We're done generating the environment so we close the transaction
