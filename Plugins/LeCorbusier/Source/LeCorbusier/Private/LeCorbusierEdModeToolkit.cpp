@@ -87,7 +87,7 @@ FReply FLeCorbusierEdModeToolkit::DoBuildEnvironment()
 		uint32 NumNatureAreas = EnvironmentSettingsWidget->CityNatureAreasSpinBox->GetValue();
 		float NaturePercentage = EnvironmentSettingsWidget->CityNaturePercentageSpinBox->GetValue();
 		
-		LCGen.CreateEnvironmentCity(AssetLoaderWidget->Items, NumNatureAreas, NaturePercentage);
+		LCGen.CreateEnvironmentCities(AssetLoaderWidget->Items, NumNatureAreas, NaturePercentage);
 	}
 	else if (EnvironmentSettingsWidget->EnvironmentTypeComboBoxSelectedItem->Equals(TEXT("Nature")))
 	{

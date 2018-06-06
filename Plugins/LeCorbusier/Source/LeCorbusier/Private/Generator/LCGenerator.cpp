@@ -10,51 +10,13 @@ void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 	// Let editor know that we're about to do something that we want to undo/redo
 	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
 	
-	// Get surface coordinates
-	FBox FloorSurface = GetFloorSurface();
-	UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
+	// Get surface coordinates & 2D 
+	FBox FloorSurface = GetFloorSurface(); // UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
+	FBox2D FloorSurface2D(FVector2D(FloorSurface.Min.X, FloorSurface.Min.Y), FVector2D(FloorSurface.Max.X, FloorSurface.Max.Y));
 
-	// Matrix generation
-	// Unreal units = cm / Matrix units = m
-	int CONVERSION_FACTOR = 100;
-	TArray<TArray<ULCAsset*>> Matrix;
-	FVector MatrixSize = FloorSurface.GetSize() / CONVERSION_FACTOR;
-	UE_LOG(LogTemp, Warning, TEXT("Matrix Size %s"), *MatrixSize.ToString());
-	Matrix.SetNum(MatrixSize.X); for (int i = 0; i < Matrix.Num(); i++) Matrix[i].SetNum(MatrixSize.Y);
-	
-	ULCAsset* EmptyItem = NewObject<ULCAsset>();
-	for(int i = 0; i < Items.Num(); i++)
-	{
-		uint32 ItemCount = 0;
-		ULCAsset* Item = Items[i];
-		int32 GridRadius = FGenericPlatformMath::CeilToInt(Item->Radius / CONVERSION_FACTOR);
-		for (int x = 0; x < Matrix.Num(); x+= GridRadius)
-			for (int y = 0; y < Matrix[x].Num(); y += GridRadius)
-			{
-				bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > ItemCount);
-				if (Item->bEnable && bInstancesAvailable && Matrix[x][y] == nullptr)
-				{
-					if (Item->Probability > FGenericPlatformMath::FRand())
-					{
-						Matrix[x][y] = Item;
-						ItemCount++;
-					}
-				}
-			}
-	}
-
-	// Place items stored in matrix into the world
-	for (int i = 0; i < Matrix.Num(); i++)
-	{
-		for (int j = 0; j < Matrix[i].Num(); j++)
-			if (Matrix[i][j] != EmptyItem && IsValid(Matrix[i][j]))
-			{
-				FVector Position(FloorSurface.Max.X - i * CONVERSION_FACTOR, FloorSurface.Min.Y + j * CONVERSION_FACTOR, FloorSurface.Min.Z);
-				FString Name = Matrix[i][j]->GetName() + FString::FromInt(i) + FString::FromInt(j); // Name could be SelectedActorName+Random/City/Nature+[Row][Col]
-				PlaceItemIntoLevel(Matrix[i][j], Position, Name);
-			}
-	}
-
+	// Generate random environment
+	TLCQuadTree QuadTree = CreateQuadTreeRandom(FloorSurface2D, Items);
+	PlaceQuadTreeIntoLevel(QuadTree, FloorSurface.Min.Z);
 
 	// We're done generating the environment so we close the transaction
 	GEditor->EndTransaction();
@@ -66,72 +28,96 @@ void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDiff
 	// Let editor know that we're about to do something that we want to undo/redo
 	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
 
-	// Get surface coordinates
-	FBox FloorSurface = GetFloorSurface();
+	// Get surface coordinates & 2D 
+	FBox FloorSurface = GetFloorSurface(); // UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
 	FBox2D FloorSurface2D(FVector2D(FloorSurface.Min.X, FloorSurface.Min.Y), FVector2D(FloorSurface.Max.X, FloorSurface.Max.Y));
-	UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
 
-
-	//todo: cogemos un punto random en el qtree, si en un radio X encontramos otro arbol 
-	//hay una probabilidad muy grande de que caiga, si no hay una probabilidad muy peque�a
-	//radius necesario?
+	// Generate random environment
+	TLCQuadTree QuadTree = CreateQuadTreeNature(FloorSurface2D, Items, bMixDifferentTrees);
+	PlaceQuadTreeIntoLevel(QuadTree, FloorSurface.Min.Z);
 	
-	uint32 NUM_FAILURES = 15;
-	
-	uint32 Failures = 0; 
-	TLCQuadTree QuadTree(FloorSurface2D, 4);
-	TArray<uint32> MaxItemInstances;
-	for (int i = 0; i < Items.Num(); i++) MaxItemInstances.Add(0);
-	
-	while(Failures < NUM_FAILURES){
-		
-		int32 RandomItemNum = FMath::RandRange(0, Items.Num() - 1);
-		ULCAsset* Item = Items[RandomItemNum];
-		bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > MaxItemInstances[RandomItemNum]);
+	// We're done generating the environment so we close the transaction
+	GEditor->EndTransaction();
+}
 
-		TArray<TLCParticle> CollisionParticles;
-		if (Item->bEnable && bInstancesAvailable)
-		{
-			FVector2D RandomPosition(FMath::FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X), FMath::FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y));
-			TLCParticle Particle(RandomPosition, Item->Radius); Particle.Item = Item;
+void LCGenerator::CreateEnvironmentCities(TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT CITY (NumNatureAreas: %d, NaturePercentage: %f)"), NumNatureAreas, NaturePercentage);
+	// Let editor know that we're about to do something that we want to undo/redo
+	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
 
-			QuadTree.Query(Particle, CollisionParticles);
+	// Get surface coordinates & 2D 
+	FBox FloorSurface = GetFloorSurface(); // UE_LOG(LogTemp, Warning, TEXT("FloorSurface is %s"), *FloorSurface.ToString());
+	FBox2D FloorSurface2D(FVector2D(FloorSurface.Min.X, FloorSurface.Min.Y), FVector2D(FloorSurface.Max.X, FloorSurface.Max.Y));
 
-			bool ProbabilitySuccess = Item->Probability > FGenericPlatformMath::FRand();
-
-			if (CollisionParticles.Num() == 0 && ProbabilitySuccess)
-			{
-				QuadTree.Insert(Particle);
-				if (Failures > 0) Failures--;
-				continue;
-			}
-		}
-		
-		if(!bInstancesAvailable || CollisionParticles.Num() != 0 ) Failures++;
-			
-	}
-	
-	TArray<TLCParticle> FinalParticles;
-	QuadTree.Query(FloorSurface2D, FinalParticles);
-	UE_LOG(LogTemp, Error, TEXT("There are %d final particles in the QuadTree"), FinalParticles.Num());
-
-	// Place items stored in quadtree into the world
-	for (int i = 0; i < FinalParticles.Num(); i++)
-	{
-		FVector Position(FinalParticles[i].Center.X, FinalParticles[i].Center.Y, FloorSurface.Min.Z);
-		FString Name = FinalParticles[i].Item->Asset->GetName() + FString::FromInt(i); // Name could be SelectedActorName+Random/City/Nature+[Row][Col]
-		PlaceItemIntoLevel(FinalParticles[i].Item, Position, Name);
-	}
-
+	// Generate random environment
+	TLCQuadTree QuadTree = CreateQuadTreeCities(FloorSurface2D, Items, NumNatureAreas, NaturePercentage);
+	PlaceQuadTreeIntoLevel(QuadTree, FloorSurface.Min.Z);
 
 	// We're done generating the environment so we close the transaction
 	GEditor->EndTransaction();
 }
 
-void LCGenerator::CreateEnvironmentCity(TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage)
-{
-	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT CITY (NumNatureAreas: %d, NaturePercentage: %f)"), NumNatureAreas, NaturePercentage);
 
+/** AUXILIAR METHODS FOR ALGORITHMS */
+TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCAsset*> Items)
+{
+	// Initialize failures count and the QuadTree
+	uint32 NumFailures = 0; TLCQuadTree QuadTree(FloorSurface2D, 4);
+	// Initialize a list to count the current instances of each item in items list
+	TArray<uint32> CurrentItemInstances; for (int i = 0; i < Items.Num(); i++) CurrentItemInstances.Add(0);
+	
+	while (NumFailures < NUM_MAX_FAILURES) {
+		// Pick a random item and check enabled and max instances
+		int32 RandomItemNum = FMath::RandRange(0, Items.Num() - 1);
+		ULCAsset* Item = Items[RandomItemNum];
+		bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > CurrentItemInstances[RandomItemNum]);
+
+		TArray<TLCParticle> CollisionParticles;
+		if (Item->bEnable && bInstancesAvailable)
+		{
+			// Generate random position within boundary and check collisions in radius
+			FVector2D RandomPosition(FMath::FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X), FMath::FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y));
+			TLCParticle Particle(RandomPosition, Item->Radius); Particle.Item = Item;
+
+			QuadTree.Query(Particle, CollisionParticles);
+			bool ProbabilitySuccess = (Item->Probability > FGenericPlatformMath::FRand());
+
+			// Insert only if no collisions found and probability
+			if (CollisionParticles.Num() == 0 && ProbabilitySuccess)
+			{
+				QuadTree.Insert(Particle);
+				if (NumFailures > 0) NumFailures--;
+				continue;
+			}
+		}
+
+		// Increase number of failures only if collision or max instances generated
+		// because the rest of checks doesn't mean that the environment is finished
+		if (!bInstancesAvailable || CollisionParticles.Num() != 0) NumFailures++;
+	}
+
+	return QuadTree;
+}
+
+TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, bool bMixDifferentTrees)
+{
+	TLCQuadTree QuadTree(FloorSurface2D, 4);
+
+	//todo: cogemos un punto random en el qtree, si en un radio X encontramos otro arbol 
+	//hay una probabilidad muy grande de que caiga, si no hay una probabilidad muy peque�a
+	//radius necesario?
+
+	return QuadTree;
+}
+
+TLCQuadTree LCGenerator::CreateQuadTreeCities(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage)
+{
+	TLCQuadTree QuadTree(FloorSurface2D, 4);
+
+	//todo: generar parcelas de la ciudad
+
+	return QuadTree;
 }
 
 
@@ -141,10 +127,8 @@ FBox LCGenerator::GetFloorSurface()
 	// Get selected actor as surface 
 	TArray<UObject*> SelectedActors;
 	GEditor->GetSelectedActors()->GetSelectedObjects(AActor::StaticClass(), SelectedActors);
-	AActor* SelectedActor = Cast<AActor>(SelectedActors[0]);
+	AActor* SelectedActor = Cast<AActor>(SelectedActors[0]); // PrintDebugAActor(SelectedActor);
 	
-	// PrintDebugAActor(SelectedActor);
-
 	FVector MinPoint, MaxPoint;
 	if (SelectedActor->GetClass()->IsChildOf(AStaticMeshActor::StaticClass()))
 	{
@@ -163,6 +147,21 @@ FBox LCGenerator::GetFloorSurface()
 
 	FBox FloorSurface(MinPoint, MaxPoint);
 	return FloorSurface;
+}
+
+void LCGenerator::PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height)
+{
+	// Get all particles in QuadTree
+	TArray<TLCParticle> FinalParticles;
+	QuadTree.Query(QuadTree.Boundary, FinalParticles); // UE_LOG(LogTemp, Error, TEXT("There are %d final particles in the QuadTree"), FinalParticles.Num());
+
+	// Place QuadTree items into World Level
+	for (int i = 0; i < FinalParticles.Num(); i++)
+	{
+		FVector Position(FinalParticles[i].Center.X, FinalParticles[i].Center.Y, Height);
+		FString Name = FinalParticles[i].Item->Asset->GetName() + FString::FromInt(i); // Name could be SelectedActorName+Random/City/Nature+[Row][Col]
+		PlaceItemIntoLevel(FinalParticles[i].Item, Position, Name);
+	}
 }
 
 void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name)

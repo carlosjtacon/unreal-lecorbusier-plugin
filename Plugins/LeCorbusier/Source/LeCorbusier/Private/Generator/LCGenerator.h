@@ -18,12 +18,21 @@ public:
 	/** AVAILABLE ALGORITHMS */
 	void CreateEnvironmentRandom(TArray<ULCAsset*> Items);
 	void CreateEnvironmentNature(TArray<ULCAsset*> Items, bool bMixDifferentTrees);
-	void CreateEnvironmentCity(TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage);
+	void CreateEnvironmentCities(TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage);
 
 private:
 
+	/** CONSTANT VALUES */
+	const uint32 NUM_MAX_FAILURES = 15;
+
+	/** AUXILIAR METHODS FOR ALGORITHMS */
+	TLCQuadTree CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCAsset*> Items);
+	TLCQuadTree CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, bool bMixDifferentTrees);
+	TLCQuadTree CreateQuadTreeCities(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, uint32 NumNatureAreas, float NaturePercentage);
+
 	/** UTILS METHODS */
 	FBox GetFloorSurface();
+	void PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height);
 	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name);
 	
 	/** DEBUG METHODS */
