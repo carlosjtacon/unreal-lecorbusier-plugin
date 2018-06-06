@@ -102,10 +102,23 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 
 TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsNature* Settings)
 {
+	bool bMix = Settings->bMixTrees;
+	
+	// Calculate number of areas of each type
+	int32 ForestNumAreas = FMath::RandRange(Settings->ForestNumAreas.Min, Settings->ForestNumAreas.Max);
+	int32 DesertNumAreas = FMath::RandRange(Settings->DesertNumAreas.Min, Settings->DesertNumAreas.Max);
+	int32 NormalNumAreas = FMath::CeilToInt((ForestNumAreas + DesertNumAreas) / 2);
+
+	// Check if total percentage is grater than 100%  ¯\_(ツ)_/¯
+	float ForestPercentage = FMath::FRandRange(Settings->ForestPercentage.Min, Settings->ForestPercentage.Max);
+	float DesertPercentage = FMath::FRandRange(Settings->DesertPercentage.Min, Settings->DesertPercentage.Max);
+	float TotalPercentage = ForestPercentage + ForestPercentage;
+	if (TotalPercentage > 100.f) ForestPercentage = 100.f * ForestPercentage / TotalPercentage;
+	if (TotalPercentage > 100.f) DesertPercentage = 100.f * DesertPercentage / TotalPercentage;
+	float NormalPercentage = 100.f - ForestPercentage - DesertPercentage;
+
+
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
-
-	//todo: generate nature area
-
 	return QuadTree;
 }
 
@@ -145,6 +158,27 @@ FBox LCGenerator::GetFloorSurface()
 
 	FBox FloorSurface(MinPoint, MaxPoint);
 	return FloorSurface;
+}
+
+float LCGenerator::GetProbabilytyChanged(float Probability, ENatureType NatureType, EAssetType AssetType)
+{
+	// In forests we have trees and rocks and no bushes
+	bool bForestGoodTypes = (AssetType == EAssetType::Tree || AssetType == EAssetType::Rock);
+	if (NatureType == ENatureType::Forest && bForestGoodTypes) return 1.f;
+
+	bool bForestBaaadTypes = (AssetType == EAssetType::Cabin || AssetType == EAssetType::Ruins || AssetType == EAssetType::Bush);
+	if (NatureType == ENatureType::Forest && bForestBaaadTypes) return 0.f;
+	
+	// In desert areas we have rocks and bushes and no trees
+	bool bDesertGoodTypes = (AssetType == EAssetType::Bush || AssetType == EAssetType::Rock);
+	if (NatureType == ENatureType::Desert && bDesertGoodTypes) return 1.f;
+
+	bool bDesertBaaadTypes = (AssetType == EAssetType::Tree);
+	if (NatureType == ENatureType::Desert && bDesertBaaadTypes) return 0.f;
+
+
+	// No changes in probability
+	return Probability;
 }
 
 void LCGenerator::PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height)

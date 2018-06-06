@@ -27,6 +27,19 @@ private:
 	/** CONSTANT VALUES */
 	const uint32 NUM_MAX_FAILURES = 20;
 
+	/** LOCAL TYPES*/
+	enum ENatureType { Forest, Normal, Desert };
+	struct FNatureBox
+	{
+		FNatureBox(FBox2D boundary, ENatureType natureType) :
+			Boundary(boundary),
+			NatureType(natureType)
+		{};
+
+		FBox2D Boundary;
+		ENatureType NatureType;
+	};
+
 	/** AUXILIAR METHODS FOR ALGORITHMS */
 	TLCQuadTree CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCAsset*> Items);
 	TLCQuadTree CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsNature* Settings);
@@ -34,6 +47,7 @@ private:
 
 	/** UTILS METHODS */
 	FBox GetFloorSurface();
+	float GetProbabilytyChanged(float Probability, ENatureType NatureType, EAssetType AssetType);
 	void PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height);
 	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name, FBox2D Boundary);
 	
