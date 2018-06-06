@@ -160,11 +160,11 @@ void LCGenerator::PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height)
 	{
 		FVector Position(FinalParticles[i].Center.X, FinalParticles[i].Center.Y, Height);
 		FString Name = FinalParticles[i].Item->Asset->GetName() + FString::FromInt(i); // Name could be SelectedActorName+Random/City/Nature+[Row][Col]
-		PlaceItemIntoLevel(FinalParticles[i].Item, Position, Name);
+		PlaceItemIntoLevel(FinalParticles[i].Item, Position, Name, QuadTree.Boundary);
 	}
 }
 
-void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name)
+void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name, FBox2D Boundary)
 {
 	// Extract static mesh item
 	UStaticMesh* MyStaticMesh = Cast<UStaticMesh>(Item->Asset); // PrintDebugUStaticMesh(MyStaticMesh);
@@ -177,11 +177,21 @@ void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString N
 	float RandomRotationYaw = FMath::FRandRange(Item->RotationZ.Min, Item->RotationZ.Max);
 
 	// Generate final actor transformation
-	FVector RandomPosition(RandomPositionX, RandomPositionY, RandomPositionZ);
-	FVector OffsetPosition(MyStaticMesh->GetBoundingBox().Max.X, MyStaticMesh->GetBoundingBox().Min.Y, MyStaticMesh->GetBoundingBox().Min.Z);
-	FVector FinalPosition = Position + RandomPosition - RandomScaleXYZ * OffsetPosition;
-	FVector FinalScale(RandomScaleXYZ, RandomScaleXYZ, RandomScaleXYZ);
 	FRotator FinalRotation(0, RandomRotationYaw, 0);
+	FVector FinalScale(RandomScaleXYZ, RandomScaleXYZ, RandomScaleXYZ);
+	FVector FinalPosition = Position + FVector(RandomPositionX, RandomPositionY, RandomPositionZ - MyStaticMesh->GetBoundingBox().Min.Z);
+	
+	// Correct actor position to be inside boundaries
+	float EdgeMinX = FinalPosition.X + (RandomScaleXYZ * MyStaticMesh->GetBoundingBox().Min.X);
+	float EdgeMinY = FinalPosition.Y + (RandomScaleXYZ * MyStaticMesh->GetBoundingBox().Min.Y);
+	float EdgeMaxX = FinalPosition.X + (RandomScaleXYZ * MyStaticMesh->GetBoundingBox().Max.X);
+	float EdgeMaxY = FinalPosition.Y + (RandomScaleXYZ * MyStaticMesh->GetBoundingBox().Max.Y);
+	
+	if (EdgeMinX < Boundary.Min.X) FinalPosition.X += FMath::Abs(EdgeMinX - Boundary.Min.X);
+	if (EdgeMinY < Boundary.Min.Y) FinalPosition.Y += FMath::Abs(EdgeMinY - Boundary.Min.Y);
+	if (EdgeMaxX > Boundary.Max.X) FinalPosition.X -= FMath::Abs(EdgeMaxX - Boundary.Max.X);
+	if (EdgeMaxY > Boundary.Max.Y) FinalPosition.Y -= FMath::Abs(EdgeMaxY - Boundary.Max.Y);
+
 	FTransform ObjectTrasform(FinalRotation, FinalPosition, FinalScale);
 
 	// Creating the actor and positioning it in the world

@@ -23,7 +23,7 @@ public:
 private:
 
 	/** CONSTANT VALUES */
-	const uint32 NUM_MAX_FAILURES = 15;
+	const uint32 NUM_MAX_FAILURES = 20;
 
 	/** AUXILIAR METHODS FOR ALGORITHMS */
 	TLCQuadTree CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCAsset*> Items);
@@ -33,7 +33,7 @@ private:
 	/** UTILS METHODS */
 	FBox GetFloorSurface();
 	void PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height);
-	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name);
+	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name, FBox2D Boundary);
 	
 	/** DEBUG METHODS */
 	void PrintDebugAActor(AActor* Actor);
