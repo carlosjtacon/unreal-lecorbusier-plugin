@@ -40,7 +40,7 @@ public:
 	void Query(FBox2D Range, TArray<TLCParticle>& FoundParticles);
 	void Query(TLCParticle Range, TArray<TLCParticle>& FoundParticles);
 
-	// ~TLCQuadTree();
+	~TLCQuadTree();
 
 private:
 	enum QuadNames

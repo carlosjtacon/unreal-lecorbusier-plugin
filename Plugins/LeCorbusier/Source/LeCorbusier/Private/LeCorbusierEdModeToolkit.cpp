@@ -72,8 +72,7 @@ class FEdMode* FLeCorbusierEdModeToolkit::GetEditorMode() const
 
 bool FLeCorbusierEdModeToolkit::BuildButtonEnabled() const
 {
-	return GEditor->GetSelectedActors()->Num() == 1
-		&& AssetLoaderWidget->Items.Num() > 0;
+	return GEditor->GetSelectedActors()->Num() == 1 && AssetLoaderWidget->Items.Num() > 0;
 }
 
 FReply FLeCorbusierEdModeToolkit::DoBuildEnvironment()

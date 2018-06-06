@@ -4,7 +4,7 @@
 
 #define LOCTEXT_NAMESPACE "FSAssetLoader"
 
-// Asset Drag and Drop Zone
+
 class SAssetDragDropZone : public SCompoundWidget
 {
 public:
@@ -66,11 +66,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SAssetLoader::Construct(const FArguments& InArgs)
 {
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	FDetailsViewArgs Args(false, false, false, FDetailsViewArgs::HideNameArea, true);
-	Args.bShowActorLabel = false;
+	FDetailsViewArgs Args(false, false, false, FDetailsViewArgs::HideNameArea, true); Args.bShowActorLabel = false;
 	DetailsWidget = PropertyModule.CreateDetailView(Args);
-	//DetailsWidget->SetVisibility(FoliageEditMode->UISettings.GetShowPaletteItemDetails() ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed);
-	//DetailsWidget->SetIsPropertyEditingEnabledDelegate(FIsPropertyEditingEnabled::CreateSP(this, &SFoliagePalette::GetIsPropertyEditingEnabled));
 
 	ChildSlot
 	[
@@ -136,7 +133,6 @@ void SAssetLoader::Construct(const FArguments& InArgs)
 
 FReply SAssetLoader::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
-	//if (UICommandList->ProcessCommandBindings(InKeyEvent))
 	if (InKeyEvent.GetKey() == EKeys::Delete)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Key Delete Pressed"));
@@ -160,10 +156,7 @@ TSharedRef<ITableRow> SAssetLoader::GenerateListRow(ULCAsset* Item, const TShare
 
 void SAssetLoader::ListSelectionChanged(ULCAsset* Item, ESelectInfo::Type SelectInfo)
 {
-	// TODO
-	const bool bForceRefresh = true;
-	// DetailsWidget->SetObjects(Item, bForceRefresh);
-	DetailsWidget->SetObject(Item, bForceRefresh);
+	DetailsWidget->SetObject(Item, true);
 }
 
 EVisibility SAssetLoader::GetListZoneVisibility() const

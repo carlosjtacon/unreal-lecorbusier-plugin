@@ -31,7 +31,7 @@ public:
 	FString ToString()
 	{
 		return FString(TEXT("Settings - ")) 
-			+ FString(TEXT(", NatureNumAreas: Min ")) + FString::FromInt(NatureNumAreas.Min) + FString(TEXT(", Max ")) + FString::FromInt(NatureNumAreas.Max)
+			+ FString(TEXT("NatureNumAreas: Min ")) + FString::FromInt(NatureNumAreas.Min) + FString(TEXT(", Max ")) + FString::FromInt(NatureNumAreas.Max)
 			+ FString(TEXT(", NaturePercentage: Min ")) + FString::SanitizeFloat(NaturePercentage.Min) + FString(TEXT(", Max ")) + FString::SanitizeFloat(NaturePercentage.Max)
 		;
 	}

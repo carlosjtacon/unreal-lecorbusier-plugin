@@ -13,9 +13,7 @@
 
 #include "../Types/ULCAsset.h"
 
-/**
- * 
- */
+
 class SAssetLoader : public SCompoundWidget
 {
 public:

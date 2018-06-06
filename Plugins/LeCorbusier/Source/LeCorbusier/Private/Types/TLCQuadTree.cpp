@@ -31,15 +31,16 @@ bool TLCParticle::Intersects(FBox2D Range)
 
 FString TLCParticle::ToString()
 {
-	return FString(TEXT("TLCParticle - Center: ")) + Center.ToString() 
-		+ FString(TEXT(", Radius: ")) + FString::SanitizeFloat(Radius);
+	return FString(TEXT("TLCParticle - "))
+		+ FString(TEXT("Center: ")) + Center.ToString()
+		+ FString(TEXT(", Radius: ")) + FString::SanitizeFloat(Radius)
+	;
 }
 
 
 /** TLCQuadTree */
 bool TLCQuadTree::Insert(TLCParticle Particle)
 {
-    // Cuidado con este método, igual toca reescribirlo con los teniendo en cuenta el límite del box
     // UE_LOG(LogTemp, Warning, TEXT("!Boundary.IsInside(Particle.Center)=%s"), (!Boundary.IsInside(Particle.Center) ? TEXT("True") : TEXT("False")));
     // UE_LOG(LogTemp, Warning, TEXT("Boundary=%s"), *Boundary.ToString());
     // UE_LOG(LogTemp, Warning, TEXT("Particle.Center=%s"), *Particle.Center.ToString());
@@ -151,11 +152,12 @@ void TLCQuadTree::Query(TLCParticle Range, TArray<TLCParticle>& FoundParticles)
 	}
 }
 
-// TLCQuadTree::~TLCQuadTree()
-// {
-//     for (TLCQuadTree* SubTree : SubTrees)
-// 	{
-// 		delete SubTree;
-// 		SubTree = nullptr;
-// 	}
-// }
+TLCQuadTree::~TLCQuadTree()
+{
+	// TODO: Check why this isn't working
+	// for (TLCQuadTree* SubTree : SubTrees)
+	// {
+	// 	delete SubTree;
+	// 	SubTree = nullptr;
+	// }
+}

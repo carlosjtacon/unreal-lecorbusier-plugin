@@ -35,11 +35,11 @@ public:
 	FFloatInterval ForestPercentage;
     
 	/** Number of areas without trees */
-	UPROPERTY(EditAnywhere, Category = NatureSettings, meta = (DisplayName = "Forest Areas", UIMin = 0, ClampMin = 0, UIMax = 25, ClampMax = 25))
+	UPROPERTY(EditAnywhere, Category = NatureSettings, meta = (DisplayName = "Desert Areas", UIMin = 0, ClampMin = 0, UIMax = 25, ClampMax = 25))
 	FInt32Interval DesertNumAreas;
 
     /** Percentage of total area dedicated to areas without trees */
-	UPROPERTY(EditAnywhere, Category = NatureSettings, meta = (DisplayName = "Forest Percent", UIMin = 0, ClampMin = 0, UIMax = 100, ClampMax = 100))
+	UPROPERTY(EditAnywhere, Category = NatureSettings, meta = (DisplayName = "Desert Percent", UIMin = 0, ClampMin = 0, UIMax = 100, ClampMax = 100))
 	FFloatInterval DesertPercentage;
 
 
