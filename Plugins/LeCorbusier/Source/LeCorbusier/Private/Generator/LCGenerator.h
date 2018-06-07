@@ -73,5 +73,5 @@ private:
 	/** DEBUG METHODS */
 	void PrintDebugAActor(AActor* Actor);
 	void PrintDebugUStaticMesh(UStaticMesh* StaticMesh);
-	void PrintDebugFNatureZoneArray(TArray<FNatureZone> NatureZones, FBox2D FloorSurface2D);
+	void PrintDebugFNatureZoneArray(TArray<FNatureZone> NatureZones);
 };

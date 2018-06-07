@@ -103,9 +103,9 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsNature* Settings)
 {
 	bool bMix = Settings->bMixTrees;
-	TArray<FNatureZone> NatureZones = GetZonesBySettings(FloorSurface2D, Settings); PrintDebugFNatureZoneArray(NatureZones, FloorSurface2D);
-	
-	
+	TArray<FNatureZone> NatureZonesWithBoundaries;
+	TArray<FNatureZone> NatureZonesByPercentage = GetZonesBySettings(FloorSurface2D, Settings);
+	SubdivideFloorTiles(FloorSurface2D, NatureZonesByPercentage, NatureZonesWithBoundaries); // PrintDebugFNatureZoneArray(NatureZonesWithBoundaries);
 	
 	
 	
@@ -244,22 +244,46 @@ TArray<LCGenerator::FNatureZone> LCGenerator::GetZonesBySettings(FBox2D FloorSur
 
 void LCGenerator::SubdivideFloorTiles(FBox2D Boundary, TArray<FNatureZone> Zones, TArray<FNatureZone>& FinalZones)
 {
-	// int SumAreas = 0;
-	// TArray<FNatureZone> Zones1, Zones2;
-	// for(int i = 0; i < Zones.Num(); i++)
-	// 	if (SumAreas < Boundary.GetArea() / 2)
-	// 	{
-	// 		Zones1.Add(Zones[i]);
-	// 		SumAreas += Zones[i].Area;
-	// 	}
-	// 	else Zones2.Add(Zones[i]);
-		 
-	// float BigEdge = Boundary.GetSize().X > Boundary.GetSize().Y ? Boundary.GetSize().X : Boundary.GetSize().Y;
-	// float SmallEdge = Boundary.GetSize().X < Boundary.GetSize().Y ? Boundary.GetSize().X : Boundary.GetSize().Y;
+	// End of recursion, just one zone to assign
+	if (Zones.Num() == 1)
+	{
+		Zones[0].Boundary = Boundary;
+		FinalZones.Add(Zones[0]);
+		return;
+	}
 
-	// // Cortamos Bid edge en dos, una zona con Area = SumArea y otra con el resto
-	// // Cuando Zones.Num == 1 asignamos el Boundary a Zone.Boundary
+	// Divide zones into two arrays of ~50% of area each
+	int SumAreas = 0;
+	TArray<FNatureZone> Zones1, Zones2;
+	for(int i = 0; i < Zones.Num(); i++)
+		if (SumAreas < Boundary.GetArea() / 2)
+		{
+			Zones1.Add(Zones[i]);
+			SumAreas += Zones[i].Area;
+		}
+		else Zones2.Add(Zones[i]);
 	
+	// Calculate boundaries and subdivide
+	float BigEdge, SmallEdge;
+	FBox2D BigBoundary, SmallBoundary;
+	if (Boundary.GetSize().X > Boundary.GetSize().Y)
+	{
+		// Split with vertical line
+		BigEdge = Boundary.GetSize().X;
+		SmallEdge = Boundary.GetSize().Y;
+		BigBoundary = FBox2D(Boundary.Min, FVector2D(Boundary.Min.X + (SumAreas/SmallEdge), Boundary.Max.Y));
+		SmallBoundary = FBox2D(FVector2D(Boundary.Min.X + (SumAreas / SmallEdge), Boundary.Min.Y), Boundary.Max);
+	}
+	else
+	{
+		// Split with horizontal line
+		BigEdge = Boundary.GetSize().Y;
+		SmallEdge = Boundary.GetSize().X;
+		BigBoundary = FBox2D(Boundary.Min, FVector2D(Boundary.Max.X, Boundary.Min.Y + (SumAreas / SmallEdge)));
+		SmallBoundary = FBox2D(FVector2D(Boundary.Min.X, Boundary.Min.Y + (SumAreas / SmallEdge)), Boundary.Max);
+	}
+	SubdivideFloorTiles(BigBoundary, Zones1, FinalZones);
+	SubdivideFloorTiles(SmallBoundary, Zones2, FinalZones);
 }
 
 void LCGenerator::PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height)
@@ -358,7 +382,7 @@ void LCGenerator::PrintDebugUStaticMesh(UStaticMesh* StaticMesh)
 	UE_LOG(LogTemp, Warning, TEXT("%s's BoundingBox Center is %s"), *StaticMeshName, *StaticMesh->GetBoundingBox().GetCenter().ToString());
 }
 
-void LCGenerator::PrintDebugFNatureZoneArray(TArray<FNatureZone> NatureZones, FBox2D FloorSurface2D)
+void LCGenerator::PrintDebugFNatureZoneArray(TArray<FNatureZone> NatureZones)
 {
 	float Sum = 0;
 	for (int i = 0; i < NatureZones.Num(); i++)
@@ -371,7 +395,6 @@ void LCGenerator::PrintDebugFNatureZoneArray(TArray<FNatureZone> NatureZones, FB
 
 		UE_LOG(LogTemp, Warning, TEXT("ZONE %d: Type: %s, Area: %f, Boundary: %s"), i, *Type, NatureZones[i].Area, *NatureZones[i].Boundary.ToString());
 	}
-	UE_LOG(LogTemp, Warning, TEXT("TOTAL AREA IS %f AND SUM OF DIVIDED AREAS IS %f)"), FloorSurface2D.GetArea(), Sum);
 }
 
 #undef LOCTEXT_NAMESPACE
