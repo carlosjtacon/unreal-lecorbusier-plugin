@@ -102,14 +102,54 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 
 TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsNature* Settings)
 {
-	bool bMix = Settings->bMixTrees;
+	// bool bMix = Settings->bMixTrees;
 	TArray<FNatureZone> NatureZonesWithBoundaries;
 	TArray<FNatureZone> NatureZonesByPercentage = GetZonesBySettings(FloorSurface2D, Settings);
 	SubdivideFloorTiles(FloorSurface2D, NatureZonesByPercentage, NatureZonesWithBoundaries); // PrintDebugFNatureZoneArray(NatureZonesWithBoundaries);
 	
-	
-	
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
+	// Initialize a list to count the current instances of each item in items list
+	TArray<uint32> CurrentItemInstances; for (int i = 0; i < Items.Num(); i++) CurrentItemInstances.Add(0);
+	for (int n = 0; n < NatureZonesWithBoundaries.Num(); n++)
+	{
+		FNatureZone NatureZone = NatureZonesWithBoundaries[n];
+		
+		// Initialize failures count
+		uint32 NumFailures = 0; 
+
+		while (NumFailures < NUM_MAX_FAILURES) {
+			// Pick a random item and check enabled and max instances
+			int32 RandomItemNum = FMath::RandRange(0, Items.Num() - 1);
+			ULCAsset* Item = Items[RandomItemNum];
+			bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > CurrentItemInstances[RandomItemNum]);
+
+			TArray<TLCParticle> CollisionParticles;
+			if (Item->bEnable && bInstancesAvailable)
+			{
+				// Generate random position within boundary of NatureZone and check collisions in radius
+				FVector2D RandomPosition(FMath::FRandRange(NatureZone.Boundary.Min.X, NatureZone.Boundary.Max.X), FMath::FRandRange(NatureZone.Boundary.Min.Y, NatureZone.Boundary.Max.Y));
+				TLCParticle Particle(RandomPosition, Item->Radius); Particle.Item = Item;
+
+				// Check probability before querying the QuadTree
+				bool ProbabilitySuccess = (GetProbabilytyChanged(Item->Probability, NatureZone.NatureType, Item->AssetType) > FGenericPlatformMath::FRand());
+				if (!ProbabilitySuccess) continue;
+
+				// Insert only if no collisions found
+				QuadTree.Query(Particle, CollisionParticles);
+				if (CollisionParticles.Num() == 0)
+				{
+					QuadTree.Insert(Particle);
+					if (NumFailures > 0) NumFailures--;
+					continue;
+				}
+			}
+
+			// Increase number of failures only if collision or max instances generated
+			// because the rest of checks doesn't mean that the environment is finished
+			if (!bInstancesAvailable || CollisionParticles.Num() != 0) NumFailures++;
+		}
+	}
+
 	return QuadTree;
 }
 
@@ -200,42 +240,53 @@ TArray<LCGenerator::FNatureZone> LCGenerator::GetZonesBySettings(FBox2D FloorSur
 	}
 
 	// Split areas into zones
+	int32 RemainingZones;
+	float AreaTo, AreaFrom;
 	TArray<FNatureZone> NatureZones;
 
-	float AreaTo, AreaFrom = 0;
-	int32 RemainingZones = ForestNumZones;
-	for (int i = 0; i < ForestNumZones; i++)
+	if (ForestArea != 0 && ForestNumZones != 0)
 	{
-		if (RemainingZones == 1) AreaTo = ForestArea;
-		else AreaTo = FMath::FRandRange(AreaFrom, ForestArea);
+		AreaFrom = 0;
+		RemainingZones = ForestNumZones;
+		for (int i = 0; i < ForestNumZones; i++)
+		{
+			if (RemainingZones == 1) AreaTo = ForestArea;
+			else AreaTo = FMath::FRandRange(AreaFrom, ForestArea);
 
-		NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Forest));
-		AreaFrom = AreaTo;
-		RemainingZones--;
+			NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Forest));
+			AreaFrom = AreaTo;
+			RemainingZones--;
+		}
+	}
+	
+	if (DesertArea != 0 && DesertNumZones != 0)
+	{
+		AreaFrom = 0;
+		RemainingZones = DesertNumZones;
+		for (int i = 0; i < DesertNumZones; i++)
+		{
+			if (RemainingZones == 1) AreaTo = DesertArea;
+			else AreaTo = FMath::FRandRange(AreaFrom, DesertArea);
+
+			NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Desert));
+			AreaFrom = AreaTo;
+			RemainingZones--;
+		}
 	}
 
-	AreaFrom = 0;
-	RemainingZones = DesertNumZones;
-	for (int i = 0; i < DesertNumZones; i++)
+	if (NormalArea != 0 && NormalNumZones != 0)
 	{
-		if (RemainingZones == 1) AreaTo = DesertArea;
-		else AreaTo = FMath::FRandRange(AreaFrom, DesertArea);
+		AreaFrom = 0;
+		RemainingZones = NormalNumZones;
+		for (int i = 0; i < NormalNumZones; i++)
+		{
+			if (RemainingZones == 1) AreaTo = NormalArea;
+			else AreaTo = FMath::FRandRange(AreaFrom, NormalArea);
 
-		NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Desert));
-		AreaFrom = AreaTo;
-		RemainingZones--;
-	}
-
-	AreaFrom = 0;
-	RemainingZones = NormalNumZones;
-	for (int i = 0; i < NormalNumZones; i++)
-	{
-		if (RemainingZones == 1) AreaTo = NormalArea;
-		else AreaTo = FMath::FRandRange(AreaFrom, NormalArea);
-
-		NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Normal));
-		AreaFrom = AreaTo;
-		RemainingZones--;
+			NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Normal));
+			AreaFrom = AreaTo;
+			RemainingZones--;
+		}
 	}
 
 	NatureZones.Sort();
