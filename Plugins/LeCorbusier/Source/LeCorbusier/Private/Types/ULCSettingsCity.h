@@ -14,16 +14,16 @@ class ULCSettingsCity : public UObject
 public:
 
 	ULCSettingsCity(): 
-		NatureNumAreas(FInt32Interval(1, 3)),
+		NatureNumZones(FInt32Interval(1, 3)),
 		NaturePercentage(FFloatInterval(10.f, 30.f))
 	{}
 	
 
-    /** Number of areas dedicated to nature */
-	UPROPERTY(EditAnywhere, Category = CitySettings, meta = (DisplayName = "Nature Areas", UIMin = 0, ClampMin = 0, UIMax = 25, ClampMax = 25))
-	FInt32Interval NatureNumAreas;
+    /** Number of zones dedicated to nature */
+	UPROPERTY(EditAnywhere, Category = CitySettings, meta = (DisplayName = "Nature zones", UIMin = 0, ClampMin = 0, UIMax = 25, ClampMax = 25))
+	FInt32Interval NatureNumZones;
 
-    /** Percentage of total area dedicated to nature areas */
+    /** Percentage of total area dedicated to nature zones */
 	UPROPERTY(EditAnywhere, Category = CitySettings, meta = (DisplayName = "Nature Percent", UIMin = 0, ClampMin = 0, UIMax = 100, ClampMax = 100))
 	FFloatInterval NaturePercentage;
 
@@ -31,7 +31,7 @@ public:
 	FString ToString()
 	{
 		return FString(TEXT("Settings - ")) 
-			+ FString(TEXT("NatureNumAreas: Min ")) + FString::FromInt(NatureNumAreas.Min) + FString(TEXT(", Max ")) + FString::FromInt(NatureNumAreas.Max)
+			+ FString(TEXT("NatureNumZones: Min ")) + FString::FromInt(NatureNumZones.Min) + FString(TEXT(", Max ")) + FString::FromInt(NatureNumZones.Max)
 			+ FString(TEXT(", NaturePercentage: Min ")) + FString::SanitizeFloat(NaturePercentage.Min) + FString(TEXT(", Max ")) + FString::SanitizeFloat(NaturePercentage.Max)
 		;
 	}

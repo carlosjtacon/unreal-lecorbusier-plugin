@@ -103,21 +103,12 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCAsset*> Items, ULCSettingsNature* Settings)
 {
 	bool bMix = Settings->bMixTrees;
+	TArray<FNatureZone> NatureZones = GetZonesBySettings(FloorSurface2D, Settings); PrintDebugFNatureZoneArray(NatureZones, FloorSurface2D);
 	
-	// Calculate number of areas of each type
-	int32 ForestNumAreas = FMath::RandRange(Settings->ForestNumAreas.Min, Settings->ForestNumAreas.Max);
-	int32 DesertNumAreas = FMath::RandRange(Settings->DesertNumAreas.Min, Settings->DesertNumAreas.Max);
-	int32 NormalNumAreas = FMath::CeilToInt((ForestNumAreas + DesertNumAreas) / 2);
-
-	// Check if total percentage is grater than 100%  ¯\_(ツ)_/¯
-	float ForestPercentage = FMath::FRandRange(Settings->ForestPercentage.Min, Settings->ForestPercentage.Max);
-	float DesertPercentage = FMath::FRandRange(Settings->DesertPercentage.Min, Settings->DesertPercentage.Max);
-	float TotalPercentage = ForestPercentage + ForestPercentage;
-	if (TotalPercentage > 100.f) ForestPercentage = 100.f * ForestPercentage / TotalPercentage;
-	if (TotalPercentage > 100.f) DesertPercentage = 100.f * DesertPercentage / TotalPercentage;
-	float NormalPercentage = 100.f - ForestPercentage - DesertPercentage;
-
-
+	
+	
+	
+	
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
 	return QuadTree;
 }
@@ -160,6 +151,11 @@ FBox LCGenerator::GetFloorSurface()
 	return FloorSurface;
 }
 
+float LCGenerator::CrossMultiplication(float a, float b, float c)
+{
+	return b * c / a;
+}
+
 float LCGenerator::GetProbabilytyChanged(float Probability, ENatureType NatureType, EAssetType AssetType)
 {
 	// In forests we have trees and rocks and no bushes
@@ -179,6 +175,91 @@ float LCGenerator::GetProbabilytyChanged(float Probability, ENatureType NatureTy
 
 	// No changes in probability
 	return Probability;
+}
+
+TArray<LCGenerator::FNatureZone> LCGenerator::GetZonesBySettings(FBox2D FloorSurface2D, ULCSettingsNature* Settings)
+{
+	// Calculate number of areas of each type
+	int32 ForestNumZones = FMath::RandRange(Settings->ForestNumZones.Min, Settings->ForestNumZones.Max);
+	int32 DesertNumZones = FMath::RandRange(Settings->DesertNumZones.Min, Settings->DesertNumZones.Max);
+	int32 NormalNumZones = FMath::CeilToInt((ForestNumZones + DesertNumZones) / 2);
+
+	// Calculate area related to percentage
+	float ForestPercentage = FMath::FRandRange(Settings->ForestPercentage.Min, Settings->ForestPercentage.Max);
+	float DesertPercentage = FMath::FRandRange(Settings->DesertPercentage.Min, Settings->DesertPercentage.Max);
+	float ForestArea = CrossMultiplication(100.f, FloorSurface2D.GetArea(), ForestPercentage);
+	float DesertArea = CrossMultiplication(100.f, FloorSurface2D.GetArea(), DesertPercentage);
+	float NormalArea = FloorSurface2D.GetArea() - ForestArea - DesertArea;
+
+	// Check if total area is grater than 100%  ¯\_(ツ)_/¯
+	if (ForestArea + DesertArea > FloorSurface2D.GetArea())
+	{
+		ForestArea = CrossMultiplication(ForestArea + DesertArea, FloorSurface2D.GetArea(), ForestArea);
+		DesertArea = CrossMultiplication(ForestArea + DesertArea, FloorSurface2D.GetArea(), DesertArea);
+		NormalArea = FloorSurface2D.GetArea() - ForestArea - DesertArea;
+	}
+
+	// Split areas into zones
+	TArray<FNatureZone> NatureZones;
+
+	float AreaTo, AreaFrom = 0;
+	int32 RemainingZones = ForestNumZones;
+	for (int i = 0; i < ForestNumZones; i++)
+	{
+		if (RemainingZones == 1) AreaTo = ForestArea;
+		else AreaTo = FMath::FRandRange(AreaFrom, ForestArea);
+
+		NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Forest));
+		AreaFrom = AreaTo;
+		RemainingZones--;
+	}
+
+	AreaFrom = 0;
+	RemainingZones = DesertNumZones;
+	for (int i = 0; i < DesertNumZones; i++)
+	{
+		if (RemainingZones == 1) AreaTo = DesertArea;
+		else AreaTo = FMath::FRandRange(AreaFrom, DesertArea);
+
+		NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Desert));
+		AreaFrom = AreaTo;
+		RemainingZones--;
+	}
+
+	AreaFrom = 0;
+	RemainingZones = NormalNumZones;
+	for (int i = 0; i < NormalNumZones; i++)
+	{
+		if (RemainingZones == 1) AreaTo = NormalArea;
+		else AreaTo = FMath::FRandRange(AreaFrom, NormalArea);
+
+		NatureZones.Add(FNatureZone(AreaTo - AreaFrom, ENatureType::Normal));
+		AreaFrom = AreaTo;
+		RemainingZones--;
+	}
+
+	NatureZones.Sort();
+	return NatureZones;
+}
+
+void LCGenerator::SubdivideFloorTiles(FBox2D Boundary, TArray<FNatureZone> Zones, TArray<FNatureZone>& FinalZones)
+{
+	// int SumAreas = 0;
+	// TArray<FNatureZone> Zones1, Zones2;
+	// for(int i = 0; i < Zones.Num(); i++)
+	// 	if (SumAreas < Boundary.GetArea() / 2)
+	// 	{
+	// 		Zones1.Add(Zones[i]);
+	// 		SumAreas += Zones[i].Area;
+	// 	}
+	// 	else Zones2.Add(Zones[i]);
+		 
+	// float BigEdge = Boundary.GetSize().X > Boundary.GetSize().Y ? Boundary.GetSize().X : Boundary.GetSize().Y;
+	// float SmallEdge = Boundary.GetSize().X < Boundary.GetSize().Y ? Boundary.GetSize().X : Boundary.GetSize().Y;
+
+	// // Cortamos Bid edge en dos, una zona con Area = SumArea y otra con el resto
+	// // Cuando Zones.Num == 1 asignamos el Boundary a Zone.Boundary
+	
 }
 
 void LCGenerator::PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height)
@@ -275,6 +356,22 @@ void LCGenerator::PrintDebugUStaticMesh(UStaticMesh* StaticMesh)
 	UE_LOG(LogTemp, Warning, TEXT("%s's BoundingBox Extent is %s"), *StaticMeshName, *StaticMesh->GetBoundingBox().GetExtent().ToString());
 	UE_LOG(LogTemp, Warning, TEXT("%s's BoundingBox Size is %s"), *StaticMeshName, *StaticMesh->GetBoundingBox().GetSize().ToString());
 	UE_LOG(LogTemp, Warning, TEXT("%s's BoundingBox Center is %s"), *StaticMeshName, *StaticMesh->GetBoundingBox().GetCenter().ToString());
+}
+
+void LCGenerator::PrintDebugFNatureZoneArray(TArray<FNatureZone> NatureZones, FBox2D FloorSurface2D)
+{
+	float Sum = 0;
+	for (int i = 0; i < NatureZones.Num(); i++)
+	{
+		Sum += NatureZones[i].Area;
+		FString Type;
+		if (NatureZones[i].NatureType == ENatureType::Forest) Type = FString(TEXT("Forest"));
+		if (NatureZones[i].NatureType == ENatureType::Desert) Type = FString(TEXT("Desert"));
+		if (NatureZones[i].NatureType == ENatureType::Normal) Type = FString(TEXT("Normal"));
+
+		UE_LOG(LogTemp, Warning, TEXT("ZONE %d: Type: %s, Area: %f, Boundary: %s"), i, *Type, NatureZones[i].Area, *NatureZones[i].Boundary.ToString());
+	}
+	UE_LOG(LogTemp, Warning, TEXT("TOTAL AREA IS %f AND SUM OF DIVIDED AREAS IS %f)"), FloorSurface2D.GetArea(), Sum);
 }
 
 #undef LOCTEXT_NAMESPACE

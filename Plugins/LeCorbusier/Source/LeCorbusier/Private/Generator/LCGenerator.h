@@ -27,17 +27,31 @@ private:
 	/** CONSTANT VALUES */
 	const uint32 NUM_MAX_FAILURES = 20;
 
-	/** LOCAL TYPES*/
-	enum ENatureType { Forest, Normal, Desert };
-	struct FNatureBox
+	/** LOCAL TYPES */
+	enum class ENatureType
 	{
-		FNatureBox(FBox2D boundary, ENatureType natureType) :
-			Boundary(boundary),
+		Forest,
+		Normal,
+		Desert
+	};
+
+	class FNatureZone
+	{
+	public:
+
+		FNatureZone(float area, ENatureType natureType) :
+			Area(area),
 			NatureType(natureType)
 		{};
 
+		float Area;
 		FBox2D Boundary;
 		ENatureType NatureType;
+
+		friend bool operator <(const FNatureZone& lh, const FNatureZone& rh)
+		{
+			return lh.Area > rh.Area;
+		}
 	};
 
 	/** AUXILIAR METHODS FOR ALGORITHMS */
@@ -47,11 +61,17 @@ private:
 
 	/** UTILS METHODS */
 	FBox GetFloorSurface();
+	TArray<FNatureZone> GetZonesBySettings(FBox2D FloorSurface2D, ULCSettingsNature* Settings);
+	
+	float CrossMultiplication(float a, float b, float c);
 	float GetProbabilytyChanged(float Probability, ENatureType NatureType, EAssetType AssetType);
+	
+	void SubdivideFloorTiles(FBox2D Boundary, TArray<FNatureZone> Zones, TArray<FNatureZone>& FinalZones);
 	void PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height);
 	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name, FBox2D Boundary);
 	
 	/** DEBUG METHODS */
 	void PrintDebugAActor(AActor* Actor);
 	void PrintDebugUStaticMesh(UStaticMesh* StaticMesh);
+	void PrintDebugFNatureZoneArray(TArray<FNatureZone> NatureZones, FBox2D FloorSurface2D);
 };
