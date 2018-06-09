@@ -23,7 +23,7 @@ void SEnvironmentSettings::Construct(const FArguments& InArgs)
 		EnvironmentTypeComboBoxSelectedItem = MakeShareable(new FString(TEXT("Random")));
 		
 		EnvironmentTypeComboBoxItems.Add(EnvironmentTypeComboBoxSelectedItem);
-		EnvironmentTypeComboBoxItems.Add(MakeShareable(new FString(TEXT("City"))));
+		// EnvironmentTypeComboBoxItems.Add(MakeShareable(new FString(TEXT("City"))));
 		EnvironmentTypeComboBoxItems.Add(MakeShareable(new FString(TEXT("Nature"))));
 	}
 
