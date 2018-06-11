@@ -317,12 +317,11 @@ void LCGenerator::SubdivideFloorTiles(FBox2D Boundary, TArray<FNatureZone> Zones
 		else Zones2.Add(Zones[i]);
 	
 	// Calculate boundaries and subdivide
-	float BigEdge, SmallEdge;
+	float SmallEdge;
 	FBox2D BigBoundary, SmallBoundary;
 	if (Boundary.GetSize().X > Boundary.GetSize().Y)
 	{
 		// Split with vertical line
-		BigEdge = Boundary.GetSize().X;
 		SmallEdge = Boundary.GetSize().Y;
 		BigBoundary = FBox2D(Boundary.Min, FVector2D(Boundary.Min.X + (SumAreas/SmallEdge), Boundary.Max.Y));
 		SmallBoundary = FBox2D(FVector2D(Boundary.Min.X + (SumAreas / SmallEdge), Boundary.Min.Y), Boundary.Max);
@@ -330,7 +329,6 @@ void LCGenerator::SubdivideFloorTiles(FBox2D Boundary, TArray<FNatureZone> Zones
 	else
 	{
 		// Split with horizontal line
-		BigEdge = Boundary.GetSize().Y;
 		SmallEdge = Boundary.GetSize().X;
 		BigBoundary = FBox2D(Boundary.Min, FVector2D(Boundary.Max.X, Boundary.Min.Y + (SumAreas / SmallEdge)));
 		SmallBoundary = FBox2D(FVector2D(Boundary.Min.X, Boundary.Min.Y + (SumAreas / SmallEdge)), Boundary.Max);
