@@ -20,6 +20,7 @@ public:
 
 	bool Contains(FVector2D Point);
 	bool Intersects(FBox2D Range);
+	bool Intersects(TLCParticle Range);
 
 	FString ToString();
 };

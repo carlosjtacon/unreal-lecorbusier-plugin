@@ -25,7 +25,7 @@ public:
 private:
 
 	/** CONSTANT VALUES */
-	const uint32 NUM_MAX_FAILURES = 20;
+	const uint32 NUM_MAX_FAILURES = 50;
 
 	/** LOCAL TYPES */
 	enum class ENatureType

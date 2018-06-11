@@ -29,6 +29,12 @@ bool TLCParticle::Intersects(FBox2D Range)
 	return Edges <= FMath::Square(Radius);
 }
 
+bool TLCParticle::Intersects(TLCParticle Range)
+{
+	float Distance = FMath::Sqrt(FMath::Square(Center.X - Range.Center.X) + FMath::Square(Center.Y - Range.Center.Y));
+	return Distance < (Radius + Range.Radius);
+}
+
 FString TLCParticle::ToString()
 {
 	return FString(TEXT("TLCParticle - "))
@@ -136,7 +142,7 @@ void TLCQuadTree::Query(TLCParticle Range, TArray<TLCParticle>& FoundParticles)
 		// UE_LOG(LogTemp, Warning, TEXT("Range.IsInside(Particles[i].Center)=%s"), (Range.IsInside(Particles[i].Center) ? TEXT("True") : TEXT("False")));
 		// UE_LOG(LogTemp, Warning, TEXT("Range=%s"), *Range.ToString());
 		// UE_LOG(LogTemp, Warning, TEXT("Particles[i].Center=%s"), *Particles[i].Center.ToString());
-		if (Range.Contains(Particles[i].Center))
+		if (Range.Intersects(Particles[i]))
 		{
 			FoundParticles.Add(Particles[i]);
 			// UE_LOG(LogTemp, Error, TEXT("Added to FoundParticles"));

@@ -183,9 +183,9 @@ FReply SAssetLoader::HandleAssetDropped(const FGeometry& DropZoneGeometry, const
 			
 			// Calculate radius auto
 			UStaticMesh* StaticMesh = Cast<UStaticMesh>(Obj->Asset);
-			FVector AssetSize = StaticMesh->GetBoundingBox().GetSize();
-			float AutoRadius = (AssetSize.X > AssetSize.Y) ? AssetSize.X : AssetSize.Y;
-			Obj->Radius = AutoRadius;
+			FVector Center = StaticMesh->GetBoundingBox().GetCenter();
+			FVector MinPoint = StaticMesh->GetBoundingBox().Min;
+			Obj->Radius = FVector2D::Distance(FVector2D(Center), FVector2D(MinPoint));
 
 			SAssetLoader::Items.Add(Obj);
 			UE_LOG(LogTemp, Warning, TEXT("Dropped AssetData"));
