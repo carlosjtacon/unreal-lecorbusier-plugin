@@ -88,6 +88,7 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 			{
 				QuadTree.Insert(Particle);
 				if (NumFailures > 0) NumFailures--;
+				CurrentItemInstances[RandomItemNum]++;
 				continue;
 			}
 		}
@@ -140,6 +141,7 @@ TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCA
 				{
 					QuadTree.Insert(Particle);
 					if (NumFailures > 0) NumFailures--;
+					CurrentItemInstances[RandomItemNum]++;
 					continue;
 				}
 			}
