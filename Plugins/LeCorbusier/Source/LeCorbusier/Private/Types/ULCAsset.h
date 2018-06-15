@@ -15,7 +15,7 @@ enum class EAssetType : uint8
 	Tree, Bush, Rock, Cabin, Ruins,
 	
 	/** City related assets */
-	Building, Monument, Streetlight, Vehicle, ThrashBin, Dumpster, Billboard
+	Building, Monument //, Streetlight, Vehicle, ThrashBin, Dumpster, Billboard
 };
 
 UCLASS()
