@@ -207,19 +207,49 @@ float LCGenerator::CrossMultiplication(float a, float b, float c)
 
 float LCGenerator::GetProbabilytyChanged(float Probability, ENatureType NatureType, EAssetType AssetType)
 {
-	// In forests we have trees and rocks and no bushes
-	bool bForestGoodTypes = (AssetType == EAssetType::Tree || AssetType == EAssetType::Rock);
-	if (NatureType == ENatureType::Forest && bForestGoodTypes) return 1.f;
+	// Changing probability in types
 
-	bool bForestBaaadTypes = (AssetType == EAssetType::Cabin || AssetType == EAssetType::Ruins || AssetType == EAssetType::Bush);
-	if (NatureType == ENatureType::Forest && bForestBaaadTypes) return 0.f;
-	
-	// In desert areas we have rocks and bushes and no trees
-	bool bDesertGoodTypes = (AssetType == EAssetType::Bush || AssetType == EAssetType::Rock);
-	if (NatureType == ENatureType::Desert && bDesertGoodTypes) return 1.f;
+	if (NatureType == ENatureType::Forest)
+	{
+		switch (AssetType)
+		{
+		case EAssetType::None:
+		case EAssetType::Building:
+		case EAssetType::Bush:
+			return 0.0f;
+		case EAssetType::Cabin:
+		case EAssetType::Ruins:
+		case EAssetType::Monument:
+			return 0.2f;
+		case EAssetType::Rock:
+			return 0.5f;
+		case EAssetType::Tree:
+			return 1.0f;
+		default:
+			return Probability;
+		}
+	}
 
-	bool bDesertBaaadTypes = (AssetType == EAssetType::Tree);
-	if (NatureType == ENatureType::Desert && bDesertBaaadTypes) return 0.f;
+	if (NatureType == ENatureType::Desert)
+	{
+		switch (AssetType)
+		{
+		case EAssetType::None:
+		case EAssetType::Tree:
+			return 0.0f;
+		case EAssetType::Cabin:
+		case EAssetType::Ruins:
+			return 0.2f;
+		case EAssetType::Bush:
+			return 0.5f;
+		case EAssetType::Rock:
+			return 1.0f;
+		case EAssetType::Building:
+		case EAssetType::Monument:
+		default:
+			return Probability;
+		}
+	}
 
 
 	// No changes in probability
