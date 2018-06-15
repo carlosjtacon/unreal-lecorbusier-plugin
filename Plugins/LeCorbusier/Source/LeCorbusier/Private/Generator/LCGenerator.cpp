@@ -65,13 +65,15 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 	// Initialize failures count and the QuadTree
 	uint32 NumFailures = 0; TLCQuadTree QuadTree(FloorSurface2D, 4);
 	// Initialize a list to count the current instances of each item in items list
-	TArray<uint32> CurrentItemInstances; for (int i = 0; i < Items.Num(); i++) CurrentItemInstances.Add(0);
+	TArray<uint32> ItemInstances; for (int i = 0; i < Items.Num(); i++) ItemInstances.Add(0);
 	
 	while (NumFailures < NUM_MAX_FAILURES) {
+		if (IsTotallyGenerated(Items, ItemInstances)) break;
+
 		// Pick a random item and check enabled and max instances
 		int32 RandomItemNum = FMath::RandRange(0, Items.Num() - 1);
 		ULCAsset* Item = Items[RandomItemNum];
-		bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > CurrentItemInstances[RandomItemNum]);
+		bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > ItemInstances[RandomItemNum]);
 
 		TArray<TLCParticle> CollisionParticles;
 		if (Item->bEnable && bInstancesAvailable)
@@ -80,22 +82,24 @@ TLCQuadTree LCGenerator::CreateQuadTreeRandom(FBox2D FloorSurface2D, TArray<ULCA
 			FVector2D RandomPosition(FMath::FRandRange(FloorSurface2D.Min.X, FloorSurface2D.Max.X), FMath::FRandRange(FloorSurface2D.Min.Y, FloorSurface2D.Max.Y));
 			TLCParticle Particle(RandomPosition, Item->Radius); Particle.Item = Item;
 
-			QuadTree.Query(Particle, CollisionParticles);
+			// Check probability before querying the QuadTree
 			bool ProbabilitySuccess = (Item->Probability > FGenericPlatformMath::FRand());
-
-			// Insert only if no collisions found and probability
-			if (CollisionParticles.Num() == 0 && ProbabilitySuccess)
+			if (!ProbabilitySuccess) continue;
+			
+			// Insert only if no collisions found
+			QuadTree.Query(Particle, CollisionParticles);
+			if (CollisionParticles.Num() == 0)
 			{
 				QuadTree.Insert(Particle);
 				if (NumFailures > 0) NumFailures--;
-				CurrentItemInstances[RandomItemNum]++;
+				ItemInstances[RandomItemNum]++;
 				continue;
 			}
 		}
 
 		// Increase number of failures only if collision or max instances generated
 		// because the rest of checks doesn't mean that the environment is finished
-		if (!bInstancesAvailable || CollisionParticles.Num() != 0) NumFailures++;
+		if (CollisionParticles.Num() != 0) NumFailures++;
 	}
 
 	return QuadTree;
@@ -110,19 +114,20 @@ TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCA
 	
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
 	// Initialize a list to count the current instances of each item in items list
-	TArray<uint32> CurrentItemInstances; for (int i = 0; i < Items.Num(); i++) CurrentItemInstances.Add(0);
+	TArray<uint32> ItemInstances; for (int i = 0; i < Items.Num(); i++) ItemInstances.Add(0);
+	
 	for (int n = 0; n < NatureZonesWithBoundaries.Num(); n++)
 	{
-		FNatureZone NatureZone = NatureZonesWithBoundaries[n];
-		
-		// Initialize failures count
-		uint32 NumFailures = 0; 
+		// Initialize failures count and get current nature zone
+		uint32 NumFailures = 0; FNatureZone NatureZone = NatureZonesWithBoundaries[n];
 
 		while (NumFailures < NUM_MAX_FAILURES) {
+			if (IsTotallyGenerated(Items, ItemInstances)) break;
+
 			// Pick a random item and check enabled and max instances
 			int32 RandomItemNum = FMath::RandRange(0, Items.Num() - 1);
 			ULCAsset* Item = Items[RandomItemNum];
-			bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > CurrentItemInstances[RandomItemNum]);
+			bool bInstancesAvailable = (Item->MaxInstances == 0 || Item->MaxInstances > ItemInstances[RandomItemNum]);
 
 			TArray<TLCParticle> CollisionParticles;
 			if (Item->bEnable && bInstancesAvailable)
@@ -131,8 +136,10 @@ TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCA
 				FVector2D RandomPosition(FMath::FRandRange(NatureZone.Boundary.Min.X, NatureZone.Boundary.Max.X), FMath::FRandRange(NatureZone.Boundary.Min.Y, NatureZone.Boundary.Max.Y));
 				TLCParticle Particle(RandomPosition, Item->Radius); Particle.Item = Item;
 
-				// Check probability before querying the QuadTree
-				bool ProbabilitySuccess = (GetProbabilytyChanged(Item->Probability, NatureZone.NatureType, Item->AssetType) > FGenericPlatformMath::FRand());
+				// Check probability related to NatureType before querying the QuadTree
+				float ProbabilityChanged = GetProbabilytyChanged(Item->Probability, NatureZone.NatureType, Item->AssetType);
+				if (ProbabilityChanged == 0) NumFailures++; // Avoid infinite loop for some types of environmet-asset combination
+				bool ProbabilitySuccess = (ProbabilityChanged > FGenericPlatformMath::FRand());
 				if (!ProbabilitySuccess) continue;
 
 				// Insert only if no collisions found
@@ -141,14 +148,14 @@ TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCA
 				{
 					QuadTree.Insert(Particle);
 					if (NumFailures > 0) NumFailures--;
-					CurrentItemInstances[RandomItemNum]++;
+					ItemInstances[RandomItemNum]++;
 					continue;
 				}
 			}
 
 			// Increase number of failures only if collision or max instances generated
 			// because the rest of checks doesn't mean that the environment is finished
-			if (!bInstancesAvailable || CollisionParticles.Num() != 0) NumFailures++;
+			if (CollisionParticles.Num() != 0) NumFailures++;
 		}
 	}
 
@@ -217,6 +224,17 @@ float LCGenerator::GetProbabilytyChanged(float Probability, ENatureType NatureTy
 
 	// No changes in probability
 	return Probability;
+}
+
+
+bool LCGenerator::IsTotallyGenerated(TArray<ULCAsset*> Items, TArray<uint32> ItemInstances)
+{
+	for (int i = 0; i < Items.Num(); i++)
+	{
+		if (Items[i]->MaxInstances == 0) return false;
+		if (Items[i]->MaxInstances != ItemInstances[i]) return false;
+	}
+	return true;
 }
 
 TArray<LCGenerator::FNatureZone> LCGenerator::GetZonesBySettings(FBox2D FloorSurface2D, ULCSettingsNature* Settings)

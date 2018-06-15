@@ -66,6 +66,7 @@ private:
 	float CrossMultiplication(float a, float b, float c);
 	float GetProbabilytyChanged(float Probability, ENatureType NatureType, EAssetType AssetType);
 	
+	bool IsTotallyGenerated(TArray<ULCAsset*> Items, TArray<uint32> ItemInstances);
 	void SubdivideFloorTiles(FBox2D Boundary, TArray<FNatureZone> Zones, TArray<FNatureZone>& FinalZones);
 	void PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height);
 	void PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name, FBox2D Boundary);
