@@ -1,2 +1,2 @@
 # Le Corbusier - Unreal Plugin
-![The City of Tomorrow](Docs/Resources/lecorbusier2.jpg)
+![The City of Tomorrow](Docs/lecorbusier/lecorbusier2.jpg)
