@@ -6,6 +6,7 @@
 /** AVAILABLE ALGORITHMS */
 void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 {
+	FDateTime start = FDateTime::Now();
 	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT RANDOM"));
 	// Let editor know that we're about to do something that we want to undo/redo
 	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
@@ -20,10 +21,16 @@ void LCGenerator::CreateEnvironmentRandom(TArray<ULCAsset*> Items)
 
 	// We're done generating the environment so we close the transaction
 	GEditor->EndTransaction();
+
+	FDateTime end = FDateTime::Now();
+	FTimespan time = end - start;
+	UE_LOG(LogTemp, Error, TEXT("LOG - Surface: %s, NumItemsList: %d, Time: %s"), 
+		*FloorSurface2D.GetSize().ToString(), Items.Num(), *time.ToString());
 }
 
 void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, ULCSettingsNature* Settings)
 {
+	FDateTime start = FDateTime::Now();
 	UE_LOG(LogTemp, Warning, TEXT("BUILDING ENVIRONMENT NATURE (%s)"), *Settings->ToString());
 	// Let editor know that we're about to do something that we want to undo/redo
 	GEditor->BeginTransaction(LOCTEXT("CreateEnvironmentRandomTransaction", "Generate Environment"));
@@ -38,6 +45,11 @@ void LCGenerator::CreateEnvironmentNature(TArray<ULCAsset*> Items, ULCSettingsNa
 	
 	// We're done generating the environment so we close the transaction
 	GEditor->EndTransaction();
+
+	FDateTime end = FDateTime::Now();
+	FTimespan time = end - start;
+	UE_LOG(LogTemp, Error, TEXT("LOG - Surface: %s, NumItemsList: %d, Time: %s"),
+		*FloorSurface2D.GetSize().ToString(), Items.Num(), *time.ToString());
 }
 
 void LCGenerator::CreateEnvironmentCities(TArray<ULCAsset*> Items, ULCSettingsCity* Settings)
@@ -112,6 +124,8 @@ TLCQuadTree LCGenerator::CreateQuadTreeNature(FBox2D FloorSurface2D, TArray<ULCA
 	TArray<FNatureZone> NatureZonesByPercentage = GetZonesBySettings(FloorSurface2D, Settings);
 	SubdivideFloorTiles(FloorSurface2D, NatureZonesByPercentage, NatureZonesWithBoundaries); // PrintDebugFNatureZoneArray(NatureZonesWithBoundaries);
 	
+	UE_LOG(LogTemp, Error, TEXT("LOG - NatureZones: %d"), NatureZonesWithBoundaries.Num());
+
 	TLCQuadTree QuadTree(FloorSurface2D, 4);
 	// Initialize a list to count the current instances of each item in items list
 	TArray<uint32> ItemInstances; for (int i = 0; i < Items.Num(); i++) ItemInstances.Add(0);
@@ -398,6 +412,8 @@ void LCGenerator::PlaceQuadTreeIntoLevel(TLCQuadTree QuadTree, float Height)
 		FString Name = FinalParticles[i].Item->Asset->GetName() + FString::FromInt(i); // Name could be SelectedActorName+Random/City/Nature+[Row][Col]
 		PlaceItemIntoLevel(FinalParticles[i].Item, Position, Name, QuadTree.Boundary);
 	}
+
+	UE_LOG(LogTemp, Error, TEXT("LOG - NumItemsGenerated: %d"), FinalParticles.Num());
 }
 
 void LCGenerator::PlaceItemIntoLevel(ULCAsset* Item, FVector Position, FString Name, FBox2D Boundary)
