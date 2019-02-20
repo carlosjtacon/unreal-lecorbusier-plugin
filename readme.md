@@ -6,7 +6,7 @@ The main objective of this project is speed up and automatize level design tasks
 > To create architecture is to put in order. Put what in order? Function and objects. - [Le Corbusier](https://en.wikipedia.org/wiki/Le_Corbusier)
 
 <img src="Docs/environments/cementerio.png" width="49%"> <img src="Docs/environments/residencial.png" width="49%">
-[Environments Gallery](Docs/environments) / [Demo Video](Docs/demo.mp4) / [User Guide (Spanish)](Docs/manual_spanish.pdf) / [Disseration (Spanish)](Docs/disseration_spanish.pdf)
+[Environments Gallery](Docs/environments) / [Demo Video](Docs/demo.mp4) / [User Guide (Spanish)](Docs/manual_spanish.pdf) / [Dissertation (Spanish)](Docs/dissertation_spanish.pdf)
 
 
 ## Future work
